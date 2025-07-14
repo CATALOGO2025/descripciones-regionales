@@ -77,8 +77,8 @@
 <button onclick="exportHtmlToExcel()">⬇️ Exportar HTML a Excel</button>
 <button onclick="downloadTemplate()">📄 Descargar Plantilla</button>
 <input type="file" id="importFile" accept=".xlsx" onchange="importExcel()"/>
-
 </div>
+
 <div class="card">
 <h2>📝 Formulario</h2>
 <form id="updateForm">
@@ -94,25 +94,10 @@
 <button type="button" onclick="clearForm()">🧹 Limpiar</button>
 </form>
 </div>
+
 <div id="tablesContainer" class="card"></div>
+
 <script>
-// Mantener las funciones JS originales sin cambios funcionales
-</script>
-    <script>
-function downloadTemplate() {
-    alert('📄 Descargar Plantilla funcionando');
-}
-
-function importExcel() {
-    alert('⬇️ Importar Excel funcionando');
-}
-
-function updateTables() {
-    alert('👁️ Actualizar Tablas funcionando');
-}
-</script>
-
-    <script>
 function downloadTemplate() {
     const link = document.createElement('a');
     link.href = 'https://catalogo2025.github.io/descripciones-regionales/plantilla_ejemplo.xlsx';
@@ -121,9 +106,22 @@ function downloadTemplate() {
     link.click();
     document.body.removeChild(link);
 }
-</script>
-    
-</body>
 
+function updateTables() {
+    alert('👁️ Visualizar tablas pendiente de funcionalidad.');
+}
+
+function exportHtmlToExcel() {
+    alert('⬇️ Exportar HTML a Excel pendiente de funcionalidad.');
+}
+
+function importExcel() {
+    alert('📁 Importar Excel pendiente de funcionalidad.');
+}
+
+function clearForm() {
+    document.getElementById("updateForm").reset();
+}
+</script>
 </body>
 </html>
