@@ -77,6 +77,18 @@
 <button onclick="exportHtmlToExcel()">⬇️ Exportar HTML a Excel</button>
 <button onclick="downloadTemplate()">📄 Descargar Plantilla</button>
 <input type="file" id="importFile" accept=".xlsx" onchange="importExcel()"/>
+
+<script>
+function downloadTemplate() {
+    const link = document.createElement('a');
+    link.href = 'https://catalogo2025.github.io/descripciones-regionales/plantilla_ejemplo.xlsx';
+    link.download = 'plantilla_ejemplo.xlsx';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+</script>
+    
 </div>
 <div class="card">
 <h2>📝 Formulario</h2>
