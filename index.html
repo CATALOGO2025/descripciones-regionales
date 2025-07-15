@@ -4,66 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Exportación de Productos Mejorada</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js">
-function limpiarTodo() {
-    document.getElementById('importFile').value = '';
-    document.getElementById('tablesContainer').innerHTML = '<p>📂 Sin datos cargados.</p>';
-    excelData = [];
-    alert('🧹 Se limpiaron los datos y las tablas correctamente.');
-}
-</script>
-<script>
-function exportHtmlToExcel() {
-    if (excelData.length < 2) {
-        alert('❌ No hay datos cargados para exportar.');
-        return;
-    }
-    const callToActions = [
-        '¡Descubre la calidad y estilo de este producto ideal para tu día a día!',
-        'Mejora tu experiencia con un producto pensado para ti. ¡Adquiérelo ahora!',
-        'Lleva la mejor opción en calidad y funcionalidad. ¡No dejes pasar la oportunidad!',
-        'Transforma tu espacio con este producto y sorpréndete con sus beneficios.',
-        'Obtén la combinación perfecta entre diseño y practicidad.',
-        '¡Aprovecha las cualidades únicas de este producto y eleva tu experiencia!',
-        'Tu mejor aliado para cada ocasión: descúbrelo ahora.',
-        'Diseño, confort y utilidad en un solo producto. ¡Consíguelo hoy mismo!',
-        'Renueva tu estilo, pensado para destacar en todo momento.',
-        'Encuentra la opción perfecta para tu necesidad y cómpralo ahora mismo.'
-    ];
-    const rows = excelData.slice(1);
-    const data = [['SKU', 'Descripción Larga']];
-    rows.forEach(row => {
-        const [sku, marca, descripcion, material, dimensiones, imgMarca, imgDesc, imgMaterial, imgDimensiones, descripcionProducto] = row;
-        const cta = callToActions[Math.floor(Math.random() * callToActions.length)];
-        const html = `<div style='border:2px solid #ccc; border-radius:12px; margin-bottom:25px; background:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.1); padding:20px;'>
-<h2 style='margin-bottom:15px; color:#2c3e50;'>${descripcion || ''}</h2>
-<div style='margin-bottom:15px; background:#fcf3cf; color:#7d6608; font-size:15px; padding:12px 20px; border-radius:8px;'>${cta}</div>
-${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent; color:#000; font-size:15px; padding:12px 20px; border-radius:8px;'>${descripcionProducto}</div>` : ''}
-<div style='border:1px solid #ddd; border-radius:8px;'>
-<h3 style='background:#2c3e50;color:white;padding:15px;margin:0; text-align:center; border-radius:8px 8px 0 0;'>Nuestros Productos | Ficha técnica y especificaciones</h3>
-<table style='width:100%; border-collapse:collapse;'>
-<tr style='border-bottom:1px solid #ddd;'><td style='width:120px;padding:15px;'><img src='${imgMarca || ''}'></td><td style='padding:15px;'><b>Descripción de la Marca:</b> ${marca || ''}</td></tr>
-<tr style='border-bottom:1px solid #ddd;'><td style='padding:15px;'><img src='${imgDesc || ''}'></td><td style='padding:15px;'><b>Nombre del Producto:</b> ${descripcion || ''}</td></tr>
-<tr style='border-bottom:1px solid #ddd;'><td style='padding:15px;'><img src='${imgMaterial || ''}'></td><td style='padding:15px;'><b>Material:</b> ${material || ''}</td></tr>
-<tr><td style='padding:15px;'><img src='${imgDimensiones || ''}'></td><td style='padding:15px;'><b>Dimensiones:</b> ${dimensiones || ''}</td></tr>
-</table>
-</div>
-</div>`;
-        data.push([sku, html]);
-    });
-    const ws = XLSX.utils.aoa_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Descripciones');
-    XLSX.writeFile(wb, 'descripciones_largas_formato_html.xlsx');
-}
-
-function limpiarTodo() {
-    document.getElementById('importFile').value = '';
-    document.getElementById('tablesContainer').innerHTML = '<p>📂 Sin datos cargados.</p>';
-    excelData = [];
-    alert('🧹 Se limpiaron los datos y las tablas correctamente.');
-}
-</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 <style>
     body {
         font-family: Calibri, sans-serif;
@@ -115,6 +56,16 @@ function limpiarTodo() {
         display: block;
         margin: 0 auto;
     }
+    .visual-id {
+        margin-bottom:15px;
+        background:#d1f2eb;
+        color:#117864;
+        font-size:13px;
+        padding:8px 15px;
+        border-radius:8px;
+        font-weight:bold;
+        text-align:center;
+    }
 </style>
 </head>
 <body>
@@ -136,6 +87,20 @@ function limpiarTodo() {
 <div id="tablesContainer" class="card"></div>
 <script>
 let excelData = [];
+
+const callToActions = [
+    '¡Descubre la calidad y estilo de este producto ideal para tu día a día!',
+    'Mejora tu experiencia con un producto pensado para ti. ¡Adquiérelo ahora!',
+    'Lleva la mejor opción en calidad y funcionalidad. ¡No dejes pasar la oportunidad!',
+    'Transforma tu espacio con este producto y sorpréndete con sus beneficios.',
+    'Obtén la combinación perfecta entre diseño y practicidad.',
+    '¡Aprovecha las cualidades únicas de este producto y eleva tu experiencia!',
+    'Tu mejor aliado para cada ocasión: descúbrelo ahora.',
+    'Diseño, confort y utilidad en un solo producto. ¡Consíguelo hoy mismo!',
+    'Renueva tu estilo, pensado para destacar en todo momento.',
+    'Encuentra la opción perfecta para tu necesidad y cómpralo ahora mismo.'
+];
+
 function downloadTemplate() {
     const link = document.createElement('a');
     link.href = 'https://catalogo2025.github.io/descripciones-regionales/plantilla_ejemplo.xlsx';
@@ -144,6 +109,7 @@ function downloadTemplate() {
     link.click();
     document.body.removeChild(link);
 }
+
 function importExcel() {
     const file = document.getElementById('importFile').files[0];
     if (!file) return alert('Por favor selecciona un archivo Excel.');
@@ -157,19 +123,8 @@ function importExcel() {
     };
     reader.readAsArrayBuffer(file);
 }
+
 function updateTables() {
-    const callToActions = [
-        '¡Descubre la calidad y estilo de este producto ideal para tu día a día!',
-        'Mejora tu experiencia con un producto pensado para ti. ¡Adquiérelo ahora!',
-        'Lleva la mejor opción en calidad y funcionalidad. ¡No dejes pasar la oportunidad!',
-        'Transforma tu espacio con este producto y sorpréndete con sus beneficios.',
-        'Obtén la combinación perfecta entre diseño y practicidad.',
-        '¡Aprovecha las cualidades únicas de este producto y eleva tu experiencia!',
-        'Tu mejor aliado para cada ocasión: descúbrelo ahora.',
-        'Diseño, confort y utilidad en un solo producto. ¡Consíguelo hoy mismo!',
-        'Renueva tu estilo, pensado para destacar en todo momento.',
-        'Encuentra la opción perfecta para tu necesidad y cómpralo ahora mismo.'
-    ];
     const container = document.getElementById('tablesContainer');
     if (excelData.length < 2) {
         container.innerHTML = '<p>❌ No hay datos cargados. Por favor sube un Excel primero.</p>';
@@ -177,12 +132,13 @@ function updateTables() {
     }
     let html = '<div style="display: flex; flex-wrap: wrap; gap: 20px;">';
     const rows = excelData.slice(1);
-    rows.forEach(row => {
+    rows.forEach((row, index) => {
         const [sku, marca, descripcion, material, dimensiones, imgMarca, imgDesc, imgMaterial, imgDimensiones, descripcionProducto] = row;
         const cta = callToActions[Math.floor(Math.random() * callToActions.length)];
-        html += `<div style='flex: 1 1 400px; border:2px solid #ccc; border-radius:12px; margin-bottom:25px; background:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.1); padding:20px;'>
+        html += `<div style='flex: 1 1 400px; margin-bottom:25px; background:#fff;'>
+<div class='visual-id'>Ficha N° ${index + 1}</div>
 <div style='margin-bottom:15px; background:#f4f6f7; color:#333; font-weight:bold; padding:12px 20px; font-size:14px; border-radius:8px;'>📦 SKU: ${sku || ''}</div>
-<h2 style='margin-bottom:15px; color:#2c3e50;'>${descripcion || ''}</h2>
+<h3 style='margin-bottom:15px; color:#2c3e50;'>${descripcion || ''}</h3>
 <div style='margin-bottom:15px; background:#fcf3cf; color:#7d6608; font-size:15px; padding:12px 20px; border-radius:8px; line-height:1.6; font-weight:bold;'>${cta}</div>
 ${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent; color:#000; font-size:15px; padding:12px 20px; border-radius:8px;'>${descripcionProducto}</div>` : ''}
 <div style='border:1px solid #ddd; border-radius:8px; background:#fff;'>
@@ -198,6 +154,35 @@ ${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent;
     });
     html += '</div>';
     container.innerHTML = html;
+}
+
+function exportHtmlToExcel() {
+    if (excelData.length < 2) return alert('❌ No hay datos cargados para exportar.');
+    const rows = excelData.slice(1);
+    const data = [['SKU', 'Descripción Larga']];
+    rows.forEach(row => {
+        const [sku, marca, descripcion, material, dimensiones, imgMarca, imgDesc, imgMaterial, imgDimensiones, descripcionProducto] = row;
+        const cta = callToActions[Math.floor(Math.random() * callToActions.length)];
+        const html = `<div style='margin-bottom:25px; background:#fff;'>
+<h3 style='margin-bottom:15px; color:#2c3e50;'>${descripcion || ''}</h3>
+<div style='margin-bottom:15px; background:#fcf3cf; color:#7d6608; font-size:15px; padding:12px 20px; border-radius:8px;'>${cta}</div>
+${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent; color:#000; font-size:15px; padding:12px 20px; border-radius:8px;'>${descripcionProducto}</div>` : ''}
+<div style='border:1px solid #ddd; border-radius:8px;'>
+<h3 style='background:#2c3e50;color:white;padding:15px;margin:0; text-align:center; border-radius:8px 8px 0 0;'>Nuestros Productos | Ficha técnica y especificaciones</h3>
+<table style='width:100%; border-collapse:collapse;'>
+<tr style='border-bottom:1px solid #ddd;'><td style='width:120px;padding:15px;'><img src='${imgMarca || ''}'></td><td style='padding:15px;'><b>Descripción de la Marca:</b> ${marca || ''}</td></tr>
+<tr style='border-bottom:1px solid #ddd;'><td style='padding:15px;'><img src='${imgDesc || ''}'></td><td style='padding:15px;'><b>Nombre del Producto:</b> ${descripcion || ''}</td></tr>
+<tr style='border-bottom:1px solid #ddd;'><td style='padding:15px;'><img src='${imgMaterial || ''}'></td><td style='padding:15px;'><b>Material:</b> ${material || ''}</td></tr>
+<tr><td style='padding:15px;'><img src='${imgDimensiones || ''}'></td><td style='padding:15px;'><b>Dimensiones:</b> ${dimensiones || ''}</td></tr>
+</table>
+</div>
+</div>`;
+        data.push([sku, html]);
+    });
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Descripciones');
+    XLSX.writeFile(wb, 'descripciones_largas_formato_html.xlsx');
 }
 
 function limpiarTodo() {
