@@ -5,6 +5,50 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Exportación de Productos Mejorada</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+<script>
+function exportHtmlToExcel() {
+    if (excelData.length < 2) {
+        alert('❌ No hay datos cargados para exportar.');
+        return;
+    }
+    const callToActions = [
+        '¡Descubre la calidad y estilo de este producto ideal para tu día a día!',
+        'Mejora tu experiencia con un producto pensado para ti. ¡Adquiérelo ahora!',
+        'Lleva la mejor opción en calidad y funcionalidad. ¡No dejes pasar la oportunidad!',
+        'Transforma tu espacio con este producto y sorpréndete con sus beneficios.',
+        'Obtén la combinación perfecta entre diseño y practicidad.',
+        '¡Aprovecha las cualidades únicas de este producto y eleva tu experiencia!',
+        'Tu mejor aliado para cada ocasión: descúbrelo ahora.',
+        'Diseño, confort y utilidad en un solo producto. ¡Consíguelo hoy mismo!',
+        'Renueva tu estilo, pensado para destacar en todo momento.',
+        'Encuentra la opción perfecta para tu necesidad y cómpralo ahora mismo.'
+    ];
+    const rows = excelData.slice(1);
+    const data = [['SKU', 'Descripción Larga']];
+    rows.forEach(row => {
+        const [sku, marca, descripcion, material, dimensiones, imgMarca, imgDesc, imgMaterial, imgDimensiones] = row;
+        const cta = callToActions[Math.floor(Math.random() * callToActions.length)];
+        const html = `<div style='border:2px solid #ccc; border-radius:12px; margin-bottom:25px; background:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.1); padding:20px;'>
+<h2 style='margin-bottom:15px; color:#2c3e50;'>${descripcion || ''}</h2>
+<div style='margin-bottom:15px; background:#fcf3cf; color:#7d6608; font-size:15px; padding:12px 20px; border-radius:8px;'>${cta}</div>
+<div style='border:1px solid #ddd; border-radius:8px;'>
+<h3 style='background:#2c3e50;color:white;padding:15px;margin:0; text-align:center; border-radius:8px 8px 0 0;'>Nuestros Productos | Ficha técnica y especificaciones</h3>
+<table style='width:100%; border-collapse:collapse;'>
+<tr style='border-bottom:1px solid #ddd;'><td style='width:120px;padding:15px;'><img src='${imgMarca || ''}'></td><td style='padding:15px;'><b>Descripción de la Marca:</b> ${marca || ''}</td></tr>
+<tr style='border-bottom:1px solid #ddd;'><td style='padding:15px;'><img src='${imgDesc || ''}'></td><td style='padding:15px;'><b>Nombre del Producto:</b> ${descripcion || ''}</td></tr>
+<tr style='border-bottom:1px solid #ddd;'><td style='padding:15px;'><img src='${imgMaterial || ''}'></td><td style='padding:15px;'><b>Material:</b> ${material || ''}</td></tr>
+<tr><td style='padding:15px;'><img src='${imgDimensiones || ''}'></td><td style='padding:15px;'><b>Dimensiones:</b> ${dimensiones || ''}</td></tr>
+</table>
+</div>
+</div>`;
+        data.push([sku, html]);
+    });
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Descripciones');
+    XLSX.writeFile(wb, 'descripciones_largas_formato_html.xlsx');
+}
+</script>
 <style>
     body {
         font-family: Calibri, sans-serif;
@@ -50,32 +94,11 @@
         transform: scale(1.02);
         box-shadow: 0 5px 12px rgba(0,0,0,0.15);
     }
-    tr:hover {
-        background: #f0f0f0;
-        transition: background 0.3s ease;
-    }
-    div[data-sku]:hover {
-        box-shadow: 0 8px 16px rgba(0,0,0,0.15);
-        transition: box-shadow 0.3s ease;
-    }
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        border-radius: 12px;
-        overflow: hidden;
-        border: 1px solid #ddd;
-        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-    }
     table img {
         width: 65px;
         height: auto;
-        margin: 0 auto;
         display: block;
-    }
-    @media (max-width: 600px) {
-        button { width: 100%; }
-        table, td, th { display: block; width: 100%; box-sizing: border-box; }
-        img { width: 80px; height: auto; margin: 0 auto; display: block; }
+        margin: 0 auto;
     }
 </style>
 </head>
@@ -124,74 +147,41 @@ function updateTables() {
         '¡Descubre la calidad y estilo de este producto ideal para tu día a día!',
         'Mejora tu experiencia con un producto pensado para ti. ¡Adquiérelo ahora!',
         'Lleva la mejor opción en calidad y funcionalidad. ¡No dejes pasar la oportunidad!',
-        'Transforma tu espacio con ${descripcion} y sorpréndete con sus beneficios.',
-        'Con ${descripcion}, obtén la combinación perfecta entre diseño y practicidad.',
-        '¡Aprovecha las cualidades únicas de ${descripcion} y eleva tu experiencia!',
-        'Tu mejor aliado para cada ocasión: descubre ${descripcion} ahora.',
+        'Transforma tu espacio con este producto y sorpréndete con sus beneficios.',
+        'Obtén la combinación perfecta entre diseño y practicidad.',
+        '¡Aprovecha las cualidades únicas de este producto y eleva tu experiencia!',
+        'Tu mejor aliado para cada ocasión: descúbrelo ahora.',
         'Diseño, confort y utilidad en un solo producto. ¡Consíguelo hoy mismo!',
-        'Renueva tu estilo con ${descripcion}, pensado para destacar en todo momento.',
-        'Encuentra la opción perfecta para tu necesidad y compra ${descripcion} ahora mismo.'
+        'Renueva tu estilo, pensado para destacar en todo momento.',
+        'Encuentra la opción perfecta para tu necesidad y cómpralo ahora mismo.'
     ];
-    let usedCtas = [];
     const container = document.getElementById('tablesContainer');
     if (excelData.length < 2) {
         container.innerHTML = '<p>❌ No hay datos cargados. Por favor sube un Excel primero.</p>';
         return;
     }
+    let html = '<div style="display: flex; flex-wrap: wrap; gap: 20px;">';
     const rows = excelData.slice(1);
-    let html = '';
     rows.forEach(row => {
-        let randomIndex;
-        do {
-            randomIndex = Math.floor(Math.random() * callToActions.length);
-        } while (usedCtas.includes(randomIndex));
-        usedCtas.push(randomIndex);
-        const callToAction = callToActions[randomIndex];
         const [sku, marca, descripcion, material, dimensiones, imgMarca, imgDesc, imgMaterial, imgDimensiones] = row;
-        html += `
-        <div style="border:2px solid #ccc; border-radius:12px; margin-bottom:25px; background:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.1); padding:20px;">
-            <div style="margin-bottom:15px; background:#f4f6f7; color:#333; font-weight:bold; padding:12px 20px; font-size:14px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.08);">
-                📦 SKU: ${sku || ''}
-            </div>
-            <h2 style="margin-bottom:15px; color:#2c3e50; font-size:22px;">${descripcion || ''}</h2>
-            <div style="margin-bottom:15px; background:#fcf3cf; color:#7d6608; font-size:15px; padding:12px 20px; border-radius:8px; line-height:1.6; font-weight:bold;">
-${callToAction.replace(/\$\{descripcion\}/g, descripcion || 'este producto')}
+        const cta = callToActions[Math.floor(Math.random() * callToActions.length)];
+        html += `<div style='flex: 1 1 400px; border:2px solid #ccc; border-radius:12px; margin-bottom:25px; background:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.1); padding:20px;'>
+<div style='margin-bottom:15px; background:#f4f6f7; color:#333; font-weight:bold; padding:12px 20px; font-size:14px; border-radius:8px;'>📦 SKU: ${sku || ''}</div>
+<h2 style='margin-bottom:15px; color:#2c3e50;'>${descripcion || ''}</h2>
+<div style='margin-bottom:15px; background:#fcf3cf; color:#7d6608; font-size:15px; padding:12px 20px; border-radius:8px; line-height:1.6; font-weight:bold;'>${cta}</div>
+<div style='border:1px solid #ddd; border-radius:8px; background:#fff;'>
+<h3 style='background:#2c3e50;color:white;padding:15px;margin:0; text-align:center; border-radius:8px 8px 0 0;'>Nuestros Productos | Ficha técnica y especificaciones</h3>
+<table style='width:100%; border-collapse:collapse;'>
+<tr style='border-bottom:1px solid #ddd;'><td style='width:120px;padding:15px;'><img src='${imgMarca || ''}' alt='Marca'></td><td style='padding:15px;'><b>Descripción de la Marca:</b> ${marca || ''}</td></tr>
+<tr style='border-bottom:1px solid #ddd;'><td style='padding:15px;'><img src='${imgDesc || ''}' alt='Descripción'></td><td style='padding:15px;'><b>Nombre del Producto:</b> ${descripcion || ''}</td></tr>
+<tr style='border-bottom:1px solid #ddd;'><td style='padding:15px;'><img src='${imgMaterial || ''}' alt='Material'></td><td style='padding:15px;'><b>Material:</b> ${material || ''}</td></tr>
+<tr><td style='padding:15px;'><img src='${imgDimensiones || ''}' alt='Dimensiones'></td><td style='padding:15px;'><b>Dimensiones:</b> ${dimensiones || ''}</td></tr>
+</table>
 </div>
-            <div style="border:1px solid #ddd; padding:0; border-radius:8px; background:#fff; box-shadow: 0 3px 10px rgba(0,0,0,0.1);">
-                <h3 style="background:#2c3e50;color:white;padding:15px;margin:0; text-align:center; border-radius:8px 8px 0 0;">Nuestros Productos | Ficha técnica y especificaciones</h3>
-                <table style="width:100%; border-collapse:collapse;">
-                    <tr style="border-bottom:1px solid #ddd;"><td style="width:120px;padding:15px;"><img src="${imgMarca || ''}" alt="Marca"></td><td style="padding:15px; vertical-align:middle;"><b>Marca:</b> ${marca || ''}</td></tr>
-                    <tr style="border-bottom:1px solid #ddd;"><td style="padding:15px;"><img src="${imgDesc || ''}" alt="Descripción"></td><td style="padding:15px; vertical-align:middle;"><b>Descripción:</b> ${descripcion || ''}</td></tr>
-                    <tr style="border-bottom:1px solid #ddd;"><td style="padding:15px;"><img src="${imgMaterial || ''}" alt="Material"></td><td style="padding:15px; vertical-align:middle;"><b>Material:</b> ${material || ''}</td></tr>
-                    <tr><td style="padding:15px;"><img src="${imgDimensiones || ''}" alt="Dimensiones"></td><td style="padding:15px; vertical-align:middle;"><b>Dimensiones:</b> ${dimensiones || ''}</td></tr>
-                </table>
-            </div>
-        </div>`;
+</div>`;
     });
+    html += '</div>';
     container.innerHTML = html;
-}
-function exportHtmlToExcel() {
-    if (excelData.length < 2) {
-        alert('❌ No hay datos cargados para exportar.');
-        return;
-    }
-    const rows = excelData.slice(1);
-    const data = [['SKU', 'Descripción Larga']];
-    rows.forEach(row => {
-        const [sku, marca, descripcion, material, dimensiones, imgMarca, imgDesc, imgMaterial, imgDimensiones] = row;
-        const descripcionHTML = `<div style='border:1px solid #ccc; border-radius:8px; background:#fff;'><h3 style='background:#2c3e50;color:white;padding:15px;text-align:center;'>Nuestros Productos | Ficha técnica y especificaciones</h3><table style='width:100%; border-collapse:collapse; border-radius:12px; overflow:hidden; border:1px solid #ddd; box-shadow: 0 3px 10px rgba(0,0,0,0.1);'><tr style='border-bottom:1px solid #ddd;'><td style='width:120px;padding:15px;'><img src='${imgMarca || ''}' style='width:80px;height:auto;display:block;margin:0 auto;'></td><td style='padding:15px;'><b>Marca:</b> ${marca || ''}</td></tr><tr style='border-bottom:1px solid #ddd;'><td style='padding:15px;'><img src='${imgDesc || ''}' style='width:80px;height:auto;display:block;margin:0 auto;'></td><td style='padding:15px;'><b>Descripción:</b> ${descripcion || ''}</td></tr><tr style='border-bottom:1px solid #ddd;'><td style='padding:15px;'><img src='${imgMaterial || ''}' style='width:80px;height:auto;display:block;margin:0 auto;'></td><td style='padding:15px;'><b>Material:</b> ${material || ''}</td></tr><tr><td style='padding:15px;'><img src='${imgDimensiones || ''}' style='width:80px;height:auto;display:block;margin:0 auto;'></td><td style='padding:15px;'><b>Dimensiones:</b> ${dimensiones || ''}</td></tr></table></div>`;
-        data.push([sku || '', descripcionHTML]);
-    });
-    const ws = XLSX.utils.aoa_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Descripciones');
-    XLSX.writeFile(wb, 'descripciones_largas_formato_html.xlsx');
-}
-function limpiarTodo() {
-    document.getElementById("tablesContainer").innerHTML = "";
-    excelData = [];
-    document.getElementById("importFile").value = "";
-    alert("✅ Datos cargados y tablas limpiados correctamente.");
 }
 </script>
 </body>
