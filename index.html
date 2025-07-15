@@ -67,11 +67,11 @@
         box-shadow: 0 3px 10px rgba(0,0,0,0.1);
     }
     table img {
-    width: 65px;
-    height: auto;
-    margin: 0 auto;
-    display: block;
-}
+        width: 65px;
+        height: auto;
+        margin: 0 auto;
+        display: block;
+    }
     @media (max-width: 600px) {
         button { width: 100%; }
         table, td, th { display: block; width: 100%; box-sizing: border-box; }
@@ -120,6 +120,19 @@ function importExcel() {
     reader.readAsArrayBuffer(file);
 }
 function updateTables() {
+    const callToActions = [
+        '¡Descubre la calidad y estilo de este producto ideal para tu día a día!',
+        'Mejora tu experiencia con un producto pensado para ti. ¡Adquiérelo ahora!',
+        'Lleva la mejor opción en calidad y funcionalidad. ¡No dejes pasar la oportunidad!',
+        'Transforma tu espacio con ${descripcion} y sorpréndete con sus beneficios.',
+        'Con ${descripcion}, obtén la combinación perfecta entre diseño y practicidad.',
+        '¡Aprovecha las cualidades únicas de ${descripcion} y eleva tu experiencia!',
+        'Tu mejor aliado para cada ocasión: descubre ${descripcion} ahora.',
+        'Diseño, confort y utilidad en un solo producto. ¡Consíguelo hoy mismo!',
+        'Renueva tu estilo con ${descripcion}, pensado para destacar en todo momento.',
+        'Encuentra la opción perfecta para tu necesidad y compra ${descripcion} ahora mismo.'
+    ];
+    let usedCtas = [];
     const container = document.getElementById('tablesContainer');
     if (excelData.length < 2) {
         container.innerHTML = '<p>❌ No hay datos cargados. Por favor sube un Excel primero.</p>';
@@ -128,16 +141,32 @@ function updateTables() {
     const rows = excelData.slice(1);
     let html = '';
     rows.forEach(row => {
+        let randomIndex;
+        do {
+            randomIndex = Math.floor(Math.random() * callToActions.length);
+        } while (usedCtas.includes(randomIndex));
+        usedCtas.push(randomIndex);
+        const callToAction = callToActions[randomIndex];
         const [sku, marca, descripcion, material, dimensiones, imgMarca, imgDesc, imgMaterial, imgDimensiones] = row;
-        html += `<div style="margin:15px; background:#f4f6f7; color:#333; font-weight:bold; padding:12px 20px; font-size:14px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.08);">📦 SKU: ${sku || ''}</div>
-<div style="border:1px solid #ccc; margin-bottom:15px; padding:0; border-radius:8px; background:#fff; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" data-sku="${sku}">
-            <h3 style="background:#2c3e50;color:white;padding:15px;border-radius:0; margin:0; text-align:center;">Nuestros Productos | Ficha técnica y especificaciones</h3>
-            <table>
-                <tr style="border-bottom:1px solid #ddd;"><td style="width:120px;padding:15px;"><img src="${imgMarca || ''}" alt="Marca"></td><td style="padding:15px; vertical-align:middle;"><b>Marca:</b> ${marca || ''}</td></tr>
-                <tr style="border-bottom:1px solid #ddd;"><td style="padding:15px;"><img src="${imgDesc || ''}" alt="Descripción"></td><td style="padding:15px; vertical-align:middle;"><b>Descripción:</b> ${descripcion || ''}</td></tr>
-                <tr style="border-bottom:1px solid #ddd;"><td style="padding:15px;"><img src="${imgMaterial || ''}" alt="Material"></td><td style="padding:15px; vertical-align:middle;"><b>Material:</b> ${material || ''}</td></tr>
-                <tr><td style="padding:15px;"><img src="${imgDimensiones || ''}" alt="Dimensiones"></td><td style="padding:15px; vertical-align:middle;"><b>Dimensiones:</b> ${dimensiones || ''}</td></tr>
-            </table></div>`;
+        html += `
+        <div style="border:2px solid #ccc; border-radius:12px; margin-bottom:25px; background:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.1); padding:20px;">
+            <div style="margin-bottom:15px; background:#f4f6f7; color:#333; font-weight:bold; padding:12px 20px; font-size:14px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.08);">
+                📦 SKU: ${sku || ''}
+            </div>
+            <h2 style="margin-bottom:15px; color:#2c3e50; font-size:22px;">${descripcion || ''}</h2>
+            <div style="margin-bottom:15px; background:#fcf3cf; color:#7d6608; font-size:15px; padding:12px 20px; border-radius:8px; line-height:1.6; font-weight:bold;">
+${callToAction.replace(/\$\{descripcion\}/g, descripcion || 'este producto')}
+</div>
+            <div style="border:1px solid #ddd; padding:0; border-radius:8px; background:#fff; box-shadow: 0 3px 10px rgba(0,0,0,0.1);">
+                <h3 style="background:#2c3e50;color:white;padding:15px;margin:0; text-align:center; border-radius:8px 8px 0 0;">Nuestros Productos | Ficha técnica y especificaciones</h3>
+                <table style="width:100%; border-collapse:collapse;">
+                    <tr style="border-bottom:1px solid #ddd;"><td style="width:120px;padding:15px;"><img src="${imgMarca || ''}" alt="Marca"></td><td style="padding:15px; vertical-align:middle;"><b>Marca:</b> ${marca || ''}</td></tr>
+                    <tr style="border-bottom:1px solid #ddd;"><td style="padding:15px;"><img src="${imgDesc || ''}" alt="Descripción"></td><td style="padding:15px; vertical-align:middle;"><b>Descripción:</b> ${descripcion || ''}</td></tr>
+                    <tr style="border-bottom:1px solid #ddd;"><td style="padding:15px;"><img src="${imgMaterial || ''}" alt="Material"></td><td style="padding:15px; vertical-align:middle;"><b>Material:</b> ${material || ''}</td></tr>
+                    <tr><td style="padding:15px;"><img src="${imgDimensiones || ''}" alt="Dimensiones"></td><td style="padding:15px; vertical-align:middle;"><b>Dimensiones:</b> ${dimensiones || ''}</td></tr>
+                </table>
+            </div>
+        </div>`;
     });
     container.innerHTML = html;
 }
