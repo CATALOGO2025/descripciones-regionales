@@ -4,7 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Exportación de Productos Mejorada</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js">
+function limpiarTodo() {
+    document.getElementById('importFile').value = '';
+    document.getElementById('tablesContainer').innerHTML = '<p>📂 Sin datos cargados.</p>';
+    excelData = [];
+    alert('🧹 Se limpiaron los datos y las tablas correctamente.');
+}
+</script>
 <script>
 function exportHtmlToExcel() {
     if (excelData.length < 2) {
@@ -26,11 +33,12 @@ function exportHtmlToExcel() {
     const rows = excelData.slice(1);
     const data = [['SKU', 'Descripción Larga']];
     rows.forEach(row => {
-        const [sku, marca, descripcion, material, dimensiones, imgMarca, imgDesc, imgMaterial, imgDimensiones] = row;
+        const [sku, marca, descripcion, material, dimensiones, imgMarca, imgDesc, imgMaterial, imgDimensiones, descripcionProducto] = row;
         const cta = callToActions[Math.floor(Math.random() * callToActions.length)];
         const html = `<div style='border:2px solid #ccc; border-radius:12px; margin-bottom:25px; background:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.1); padding:20px;'>
 <h2 style='margin-bottom:15px; color:#2c3e50;'>${descripcion || ''}</h2>
 <div style='margin-bottom:15px; background:#fcf3cf; color:#7d6608; font-size:15px; padding:12px 20px; border-radius:8px;'>${cta}</div>
+${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent; color:#000; font-size:15px; padding:12px 20px; border-radius:8px;'>${descripcionProducto}</div>` : ''}
 <div style='border:1px solid #ddd; border-radius:8px;'>
 <h3 style='background:#2c3e50;color:white;padding:15px;margin:0; text-align:center; border-radius:8px 8px 0 0;'>Nuestros Productos | Ficha técnica y especificaciones</h3>
 <table style='width:100%; border-collapse:collapse;'>
@@ -47,6 +55,13 @@ function exportHtmlToExcel() {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Descripciones');
     XLSX.writeFile(wb, 'descripciones_largas_formato_html.xlsx');
+}
+
+function limpiarTodo() {
+    document.getElementById('importFile').value = '';
+    document.getElementById('tablesContainer').innerHTML = '<p>📂 Sin datos cargados.</p>';
+    excelData = [];
+    alert('🧹 Se limpiaron los datos y las tablas correctamente.');
 }
 </script>
 <style>
@@ -163,12 +178,13 @@ function updateTables() {
     let html = '<div style="display: flex; flex-wrap: wrap; gap: 20px;">';
     const rows = excelData.slice(1);
     rows.forEach(row => {
-        const [sku, marca, descripcion, material, dimensiones, imgMarca, imgDesc, imgMaterial, imgDimensiones] = row;
+        const [sku, marca, descripcion, material, dimensiones, imgMarca, imgDesc, imgMaterial, imgDimensiones, descripcionProducto] = row;
         const cta = callToActions[Math.floor(Math.random() * callToActions.length)];
         html += `<div style='flex: 1 1 400px; border:2px solid #ccc; border-radius:12px; margin-bottom:25px; background:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.1); padding:20px;'>
 <div style='margin-bottom:15px; background:#f4f6f7; color:#333; font-weight:bold; padding:12px 20px; font-size:14px; border-radius:8px;'>📦 SKU: ${sku || ''}</div>
 <h2 style='margin-bottom:15px; color:#2c3e50;'>${descripcion || ''}</h2>
 <div style='margin-bottom:15px; background:#fcf3cf; color:#7d6608; font-size:15px; padding:12px 20px; border-radius:8px; line-height:1.6; font-weight:bold;'>${cta}</div>
+${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent; color:#000; font-size:15px; padding:12px 20px; border-radius:8px;'>${descripcionProducto}</div>` : ''}
 <div style='border:1px solid #ddd; border-radius:8px; background:#fff;'>
 <h3 style='background:#2c3e50;color:white;padding:15px;margin:0; text-align:center; border-radius:8px 8px 0 0;'>Nuestros Productos | Ficha técnica y especificaciones</h3>
 <table style='width:100%; border-collapse:collapse;'>
@@ -182,6 +198,13 @@ function updateTables() {
     });
     html += '</div>';
     container.innerHTML = html;
+}
+
+function limpiarTodo() {
+    document.getElementById('importFile').value = '';
+    document.getElementById('tablesContainer').innerHTML = '<p>📂 Sin datos cargados.</p>';
+    excelData = [];
+    alert('🧹 Se limpiaron los datos y las tablas correctamente.');
 }
 </script>
 </body>
