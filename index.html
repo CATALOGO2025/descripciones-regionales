@@ -3,69 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Exportación de Productos Mejorada</title>
+<title>Exportación de Productos Mejorada con Video Limpio</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 <style>
-    body {
-        font-family: Calibri, sans-serif;
-        margin: 0;
-        background-color: #f4f6f7;
-        font-size: 14px;
-    }
-    .header {
-        background-color: #1f618d;
-        color: white;
-        padding: 20px;
-        font-size: 28px;
-        text-align: center;
-        font-weight: bold;
-    }
-    .card {
-        margin: 20px;
-        background: linear-gradient(180deg, #ffffff, #f8f9fa);
-        border-radius: 12px;
-        padding: 20px;
-        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-        border: 1px solid #ddd;
-    }
-    h2 {
-        border-bottom: 1px solid #ddd;
-        padding-bottom: 10px;
-        font-size: 20px;
-    }
-    button {
-        background: linear-gradient(#1f618d, #154360);
-        color: white;
-        border: none;
-        padding: 12px 20px;
-        margin-right: 10px;
-        margin-bottom: 10px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 14px;
-        box-shadow: 0 3px 6px rgba(0,0,0,0.1);
-        transition: all 0.2s ease-in-out;
-    }
-    button:hover {
-        transform: scale(1.02);
-        box-shadow: 0 5px 12px rgba(0,0,0,0.15);
-    }
-    table img {
-        width: 65px;
-        height: auto;
-        display: block;
-        margin: 0 auto;
-    }
-    .visual-id {
-        margin-bottom:15px;
-        background:#d1f2eb;
-        color:#117864;
-        font-size:13px;
-        padding:8px 15px;
-        border-radius:8px;
-        font-weight:bold;
-        text-align:center;
-    }
+    body { font-family: Calibri, sans-serif; margin: 0; background-color: #f4f6f7; font-size: 14px; }
+    .header { background-color: #1f618d; color: white; padding: 20px; font-size: 28px; text-align: center; font-weight: bold; }
+    .card { margin: 20px; background: linear-gradient(180deg, #ffffff, #f8f9fa); border-radius: 12px; padding: 20px; box-shadow: 0 3px 10px rgba(0,0,0,0.1); border: 1px solid #ddd; }
+    h2 { border-bottom: 1px solid #ddd; padding-bottom: 10px; font-size: 20px; }
+    button { background: linear-gradient(#1f618d, #154360); color: white; border: none; padding: 12px 20px; margin-right: 10px; margin-bottom: 10px; border-radius: 6px; cursor: pointer; font-size: 14px; box-shadow: 0 3px 6px rgba(0,0,0,0.1); transition: all 0.2s ease-in-out; }
+    button:hover { transform: scale(1.02); box-shadow: 0 5px 12px rgba(0,0,0,0.15); }
+    table img { width: 65px; height: auto; display: block; margin: 0 auto; }
+    .visual-id { margin-bottom:15px; background:#d1f2eb; color:#117864; font-size:13px; padding:8px 15px; border-radius:8px; font-weight:bold; text-align:center; }
 </style>
 </head>
 <body>
@@ -101,6 +49,21 @@ const callToActions = [
     'Encuentra la opción perfecta para tu necesidad y cómpralo ahora mismo.'
 ];
 
+function cleanYoutubeUrl(url) {
+    if (!url) return '';
+    let cleanUrl = url.trim();
+    if (cleanUrl.includes('youtu.be/')) {
+        cleanUrl = cleanUrl.split('?')[0];
+        const videoId = cleanUrl.split('youtu.be/')[1];
+        return `https://www.youtube.com/embed/${videoId}`;
+    }
+    if (cleanUrl.includes('watch?v=')) {
+        cleanUrl = cleanUrl.replace('watch?v=', 'embed/').split('&')[0];
+        return cleanUrl.split('?')[0];
+    }
+    return cleanUrl.split('?')[0];
+}
+
 function downloadTemplate() {
     const link = document.createElement('a');
     link.href = 'https://catalogo2025.github.io/descripciones-regionales/plantilla_ejemplo.xlsx';
@@ -133,8 +96,9 @@ function updateTables() {
     let html = '<div style="display: flex; flex-wrap: wrap; gap: 20px;">';
     const rows = excelData.slice(1);
     rows.forEach((row, index) => {
-        const [sku, marca, descripcion, material, dimensiones, imgMarca, imgDesc, imgMaterial, imgDimensiones, descripcionProducto] = row;
+        const [sku, marca, descripcion, material, dimensiones, imgMarca, imgDesc, imgMaterial, imgDimensiones, descripcionProducto, videoUrl] = row;
         const cta = callToActions[Math.floor(Math.random() * callToActions.length)];
+        const embedUrl = cleanYoutubeUrl(videoUrl);
         html += `<div style='flex: 1 1 400px; margin-bottom:25px; background:#fff;'>
 <div class='visual-id'>Ficha N° ${index + 1}</div>
 <div style='margin-bottom:15px; background:#f4f6f7; color:#333; font-weight:bold; padding:12px 20px; font-size:14px; border-radius:8px;'>📦 SKU: ${sku || ''}</div>
@@ -150,6 +114,7 @@ ${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent;
 <tr><td style='padding:15px;'><img src='${imgDimensiones || ''}' alt='Dimensiones'></td><td style='padding:15px;'><b>Dimensiones:</b> ${dimensiones || ''}</td></tr>
 </table>
 </div>
+${embedUrl ? `<div style='margin-top:15px;'><iframe width='100%' height='220' src='${embedUrl}' frameborder='0' allowfullscreen></iframe></div>` : ''}
 </div>`;
     });
     html += '</div>';
@@ -161,8 +126,9 @@ function exportHtmlToExcel() {
     const rows = excelData.slice(1);
     const data = [['SKU', 'Descripción Larga']];
     rows.forEach(row => {
-        const [sku, marca, descripcion, material, dimensiones, imgMarca, imgDesc, imgMaterial, imgDimensiones, descripcionProducto] = row;
+        const [sku, marca, descripcion, material, dimensiones, imgMarca, imgDesc, imgMaterial, imgDimensiones, descripcionProducto, videoUrl] = row;
         const cta = callToActions[Math.floor(Math.random() * callToActions.length)];
+        const embedUrl = cleanYoutubeUrl(videoUrl);
         const html = `<div style='margin-bottom:25px; background:#fff;'>
 <h3 style='margin-bottom:15px; color:#2c3e50;'>${descripcion || ''}</h3>
 <div style='margin-bottom:15px; background:#fcf3cf; color:#7d6608; font-size:15px; padding:12px 20px; border-radius:8px;'>${cta}</div>
@@ -176,6 +142,7 @@ ${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent;
 <tr><td style='padding:15px;'><img src='${imgDimensiones || ''}'></td><td style='padding:15px;'><b>Dimensiones:</b> ${dimensiones || ''}</td></tr>
 </table>
 </div>
+${embedUrl ? `<div style='margin-top:15px;'><iframe width='100%' height='220' src='${embedUrl}' frameborder='0' allowfullscreen></iframe></div>` : ''}
 </div>`;
         data.push([sku, html]);
     });
