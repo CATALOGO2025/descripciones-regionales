@@ -1,8 +1,9 @@
 <!DOCTYPE html>
+
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Exportación de Productos Mejorada con Video Limpio</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 <script>
@@ -32,26 +33,18 @@ function formatDescripcionHTML(textoPlano) {
 <div class="card">
 <h2>📜 Instrucciones</h2>
 <ul style="line-height:1.7;">
-  <li>👨‍💻 <b>Descargar Plantilla:</b> Usa el botón para descargar un Excel preformateado.</li>
-  <li>📁 <b>Procesar Excel:</b> Completa los campos requeridos.</li>
-  <li>👁️ <b>Previsualizar:</b> Visualizar Tablas muestra resultados.</li>
-  <li>⬇️ <b>Exportar:</b> Exportar HTML a Excel descarga resultados.</li>
-</ul>
-
-<h3 style="margin-top:25px; font-size:16px;">📌 <b>Directrices:</b></h3>
-<ul style="line-height:1.7;">
-  <li>🔹 <b>Descripción de la Marca:</b> Se debe usar la que está adjunta en el Excel tipo en la descarga.</li>
-  <li>🔹 <b>URL de Imagen de Marca:</b> Debe estar alojada en nuestros servidores internos. <u>No se permiten URLs externas</u>.</li>
-  <li>🔹 <b>Descripción del Producto:</b> Este campo se convierte en texto HTML. Puedes usar palabras <code>*entre asteriscos*</code> para aplicar <b>negrita</b> y añadir <code>##</code> antes de títulos para identificarlos.</li>
-  <li>🔹 <b>VideoYouTube:</b> Se permite tanto la URL corta como la original. Se convertirá automáticamente en video incrustado.</li>
-</ul>
+<li>👨‍💻 <b>Descargar Plantilla:</b> Usa el botón para descargar un Excel preformateado.</li>
+<li>📁 <b>Procesar Excel:</b> Completa los campos requeridos.</li>
+<li>👁️ <b>Previsualizar:</b> Visualizar Tablas muestra resultados.</li>
+<li>⬇️ <b>Exportar:</b> Exportar HTML a Excel descarga resultados.</li>
+</ul><h3>📌 Directrices</h3><ul style="line-height:1.7;"><li><b>Descripción de la Marca:</b> Se debe usar la que está adjunta en el Excel tipo en la descarga.</li><li><b>Imagen de Marca:</b> La URL debe estar en nuestros servidores internos. No se permiten URLs externas.</li><li><b>Descripción del Producto:</b> Este campo se convierte en texto HTML. Usa palabras *entre asteriscos* para poner en negrita, y ## antes de títulos para destacarlos.</li><li><b>Video YouTube:</b> Se acepta tanto la URL corta como la larga para incrustar videos.</li><li><b>Meta Descripción:</b> Máximo 120 caracteres, si el campo viene vacío se completará con una frase por defecto.</li></ul>
 <button onclick="updateTables()">👁️ Visualizar Tablas</button>
 <button onclick="exportHtmlToExcel()">⬇️ Exportar HTML a Excel</button>
 <button onclick="downloadTemplate()">📄 Descargar Plantilla</button>
 <button onclick="limpiarTodo()">🧹 Limpiar Todo</button>
-<input type="file" id="importFile" accept=".xlsx" onchange="importExcel()"/>
+<input accept=".xlsx" id="importFile" onchange="importExcel()" type="file"/>
 </div>
-<div id="tablesContainer" class="card"></div>
+<div class="card" id="tablesContainer"></div>
 <script>
 let excelData = [];
 const callToActions = [
@@ -114,14 +107,16 @@ function updateTables() {
     let html = '<div style="display: flex; flex-wrap: wrap; gap: 20px;">';
     const rows = excelData.slice(1);
     rows.forEach((row, index) => {
-        const [sku, marca, descripcion, material, dimensiones, imgMarca, imgDesc, imgMaterial, imgDimensiones, descripcionProducto, videoUrl] = row;
-        const cta = callToActions[Math.floor(Math.random() * callToActions.length)];
+        const [sku, marca, descripcion, material, dimensiones, imgMarca, imgDesc, imgMaterial, imgDimensiones, descripcionProducto, videoUrl, metaDescripcion] = row;
+        
+const cta = metaDescripcion?.trim() || callToActions[Math.floor(Math.random() * callToActions.length)];
+
         const embedUrl = cleanYoutubeUrl(videoUrl);
         html += `<div style='flex: 1 1 400px; margin-bottom:25px; background:#fff;'>
 <div class='visual-id'>Ficha N° ${index + 1}</div>
-<div style='margin-bottom:15px; background:#f4f6f7; color:#333; font-weight:bold; padding:12px 20px; font-size:14px; border-radius:8px;'>📦 SKU: ${sku || ''}</div>
+<div style='margin-bottom:15px; background:#f4f6f7; color:#333;  padding:12px 20px; font-size:14px; border-radius:8px;'>📦 SKU: ${sku || ''}</div>
 <h3 style='margin-bottom:15px; color:#2c3e50;'>${descripcion || ''}</h3>
-<div style='margin-bottom:15px; background:#fcf3cf; color:#7d6608; font-size:15px; padding:12px 20px; border-radius:8px; line-height:1.6; font-weight:bold;'>${cta}</div>
+<div style='margin-bottom:15px; background:#fcf3cf; color:#7d6608; font-size:15px; padding:12px 20px; border-radius:8px; line-height:1.6; '>${cta}</div>
 ${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent; color:#000; font-size:15px; padding:12px 20px; border-radius:8px;'>${formatDescripcionHTML(descripcionProducto)}</div>` : ''}
 <div style='border:1px solid #ddd; border-radius:8px; background:#fff;'>
 <h3 style='background:#2c3e50;color:white;padding:15px;margin:0; text-align:center; border-radius:8px 8px 0 0;'>Nuestros Productos | Ficha técnica y especificaciones</h3>
@@ -143,12 +138,14 @@ function exportHtmlToExcel() {
     const rows = excelData.slice(1);
     const data = [['SKU', 'Descripción Larga']];
     rows.forEach(row => {
-        const [sku, marca, descripcion, material, dimensiones, imgMarca, imgDesc, imgMaterial, imgDimensiones, descripcionProducto, videoUrl] = row;
-        const cta = callToActions[Math.floor(Math.random() * callToActions.length)];
+        const [sku, marca, descripcion, material, dimensiones, imgMarca, imgDesc, imgMaterial, imgDimensiones, descripcionProducto, videoUrl, metaDescripcion] = row;
+        
+const cta = metaDescripcion?.trim() || callToActions[Math.floor(Math.random() * callToActions.length)];
+
         const embedUrl = cleanYoutubeUrl(videoUrl);
         let html = `<div style='margin-bottom:25px; background:#fff;'>
 <h3 style='margin-bottom:15px; color:#2c3e50;'>${descripcion || ''}</h3>
-<div style='margin-bottom:15px; background:#fcf3cf; color:#7d6608; font-size:15px; padding:12px 20px; border-radius:8px;'>${cta}</div>
+<div style='margin-bottom:15px; background:#fcf3cf; color:#7d6608; font-size:15px; padding:12px 20px; border-radius:8px; font-weight:normal;'>${cta}</div>
 ${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent; color:#000; font-size:15px; padding:12px 20px; border-radius:8px;'>${formatDescripcionHTML(descripcionProducto)}</div>` : ''}
 <div style='border:1px solid #ddd; border-radius:8px;'>
 <h3 style='background:#2c3e50;color:white;padding:15px;margin:0; text-align:center;'>Nuestros Productos | Ficha técnica y especificaciones</h3>
