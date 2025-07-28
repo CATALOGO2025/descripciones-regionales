@@ -5,6 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Exportación de Productos Mejorada con Video Limpio</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+<script>
+function formatDescripcionHTML(textoPlano) {
+    if (!textoPlano) return '';
+    let html = textoPlano
+        .replace(/\*(.*?)\*/g, '<b>$1</b>')                          // Negrita entre * *
+        .replace(/(^|\n)##\s*(.+)/g, '$1<b>$2</b>')                  // Títulos con ##
+        .replace(/\r?\n\r?\n/g, '</p><p>')                         // Párrafos dobles
+        .replace(/\r?\n/g, '<br>');                                  // Salto simple
+    return `<p>${html}</p>`;
+}
+</script>
 <style>
     body { font-family: Calibri, sans-serif; margin: 0; background-color: #f4f6f7; font-size: 14px; }
     .header { background-color: #1f618d; color: white; padding: 20px; font-size: 28px; text-align: center; font-weight: bold; }
@@ -21,10 +32,18 @@
 <div class="card">
 <h2>📜 Instrucciones</h2>
 <ul style="line-height:1.7;">
-<li>👨‍💻 <b>Descargar Plantilla:</b> Usa el botón para descargar un Excel preformateado.</li>
-<li>📁 <b>Procesar Excel:</b> Completa los campos requeridos.</li>
-<li>👁️ <b>Previsualizar:</b> Visualizar Tablas muestra resultados.</li>
-<li>⬇️ <b>Exportar:</b> Exportar HTML a Excel descarga resultados.</li>
+  <li>👨‍💻 <b>Descargar Plantilla:</b> Usa el botón para descargar un Excel preformateado.</li>
+  <li>📁 <b>Procesar Excel:</b> Completa los campos requeridos.</li>
+  <li>👁️ <b>Previsualizar:</b> Visualizar Tablas muestra resultados.</li>
+  <li>⬇️ <b>Exportar:</b> Exportar HTML a Excel descarga resultados.</li>
+</ul>
+
+<h3 style="margin-top:25px; font-size:16px;">📌 <b>Directrices:</b></h3>
+<ul style="line-height:1.7;">
+  <li>🔹 <b>Descripción de la Marca:</b> Se debe usar la que está adjunta en el Excel tipo en la descarga.</li>
+  <li>🔹 <b>URL de Imagen de Marca:</b> Debe estar alojada en nuestros servidores internos. <u>No se permiten URLs externas</u>.</li>
+  <li>🔹 <b>Descripción del Producto:</b> Este campo se convierte en texto HTML. Puedes usar palabras <code>*entre asteriscos*</code> para aplicar <b>negrita</b> y añadir <code>##</code> antes de títulos para identificarlos.</li>
+  <li>🔹 <b>VideoYouTube:</b> Se permite tanto la URL corta como la original. Se convertirá automáticamente en video incrustado.</li>
 </ul>
 <button onclick="updateTables()">👁️ Visualizar Tablas</button>
 <button onclick="exportHtmlToExcel()">⬇️ Exportar HTML a Excel</button>
@@ -103,7 +122,7 @@ function updateTables() {
 <div style='margin-bottom:15px; background:#f4f6f7; color:#333; font-weight:bold; padding:12px 20px; font-size:14px; border-radius:8px;'>📦 SKU: ${sku || ''}</div>
 <h3 style='margin-bottom:15px; color:#2c3e50;'>${descripcion || ''}</h3>
 <div style='margin-bottom:15px; background:#fcf3cf; color:#7d6608; font-size:15px; padding:12px 20px; border-radius:8px; line-height:1.6; font-weight:bold;'>${cta}</div>
-${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent; color:#000; font-size:15px; padding:12px 20px; border-radius:8px;'>${descripcionProducto}</div>` : ''}
+${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent; color:#000; font-size:15px; padding:12px 20px; border-radius:8px;'>${formatDescripcionHTML(descripcionProducto)}</div>` : ''}
 <div style='border:1px solid #ddd; border-radius:8px; background:#fff;'>
 <h3 style='background:#2c3e50;color:white;padding:15px;margin:0; text-align:center; border-radius:8px 8px 0 0;'>Nuestros Productos | Ficha técnica y especificaciones</h3>
 <table style='width:100%; border-collapse:collapse;'>`;
@@ -130,7 +149,7 @@ function exportHtmlToExcel() {
         let html = `<div style='margin-bottom:25px; background:#fff;'>
 <h3 style='margin-bottom:15px; color:#2c3e50;'>${descripcion || ''}</h3>
 <div style='margin-bottom:15px; background:#fcf3cf; color:#7d6608; font-size:15px; padding:12px 20px; border-radius:8px;'>${cta}</div>
-${descripcionProducto ? `<div style='margin-bottom:15px; color:#000; font-size:15px; padding:12px 20px;'>${descripcionProducto}</div>` : ''}
+${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent; color:#000; font-size:15px; padding:12px 20px; border-radius:8px;'>${formatDescripcionHTML(descripcionProducto)}</div>` : ''}
 <div style='border:1px solid #ddd; border-radius:8px;'>
 <h3 style='background:#2c3e50;color:white;padding:15px;margin:0; text-align:center;'>Nuestros Productos | Ficha técnica y especificaciones</h3>
 <table style='width:100%; border-collapse:collapse;'>`;
