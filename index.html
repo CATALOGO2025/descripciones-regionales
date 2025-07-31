@@ -159,7 +159,7 @@ const cta = metaDescripcion?.trim() || callToActions[Math.floor(Math.random() * 
         const embedUrl = cleanYoutubeUrl(videoUrl);
         let html = `<div style='margin-bottom:25px; background:#fff;'>
 <h3 style='margin-bottom:15px; color:#2c3e50;'>${descripcion || ''}</h3>
-<div style='margin-bottom:15px; background:#f4f6f7; color:#333; font-size:15px; padding:12px 20px; border-radius:8px; font-weight:normal;'>${cta}</div>
+<div class="meta-descripcion" style='margin-bottom:15px; background:#f4f6f7; color:#333; font-size:15px; padding:12px 20px; border-radius:8px; font-weight:normal;'>${cta}</div>
 ${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent; color:#000; font-size:15px; padding:12px 20px; border-radius:8px;'>${formatDescripcionHTML(descripcionProducto)}</div>` : ''}
 <div style='border:1px solid #ddd; border-radius:8px;'>
 <h3 style='background:#2c3e50;color:white;padding:15px;margin:0; text-align:center;'>Nuestros Productos | Ficha técnica y especificaciones</h3>
