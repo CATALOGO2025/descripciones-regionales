@@ -17,16 +17,267 @@ function formatDescripcionHTML(textoPlano) {
     return `<p>${html}</p>`;
 }
 </script>
-<style>
-    body { font-family: Calibri, sans-serif; margin: 0; background-color: #f4f6f7; font-size: 14px; }
+<style>body { font-family: Calibri, sans-serif; margin: 0; background-color: #f4f6f7; font-size: 14px; }
     .header { background-color: #1f618d; color: white; padding: 20px; font-size: 28px; text-align: center; font-weight: bold; }
     .card { margin: 20px; background: linear-gradient(180deg, #ffffff, #f8f9fa); border-radius: 12px; padding: 20px; box-shadow: 0 3px 10px rgba(0,0,0,0.1); border: 1px solid #ddd; }
     h2 { border-bottom: 1px solid #ddd; padding-bottom: 10px; font-size: 20px; }
     button { background: linear-gradient(#1f618d, #154360); color: white; border: none; padding: 12px 20px; margin-right: 10px; margin-bottom: 10px; border-radius: 6px; cursor: pointer; font-size: 14px; box-shadow: 0 3px 6px rgba(0,0,0,0.1); transition: all 0.2s ease-in-out; }
     button:hover { transform: scale(1.02); box-shadow: 0 5px 12px rgba(0,0,0,0.15); }
-    table img { width: 65px; height: auto; display: block; margin: 0 auto; }
+    
     .visual-id { margin-bottom:15px; background:#d1f2eb; color:#117864; font-size:13px; padding:8px 15px; border-radius:8px; font-weight:bold; text-align:center; }
+
+
+/* Estilo específico para el logo (marca) */
+img[alt="Marca"] {
+  max-width: 100px !important;
+  height: auto !important;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Estilos para imágenes de la tabla (Nombre, Material, Dimensiones) */
+img[alt="Descripción"],
+img[alt="Material"],
+img[alt="Dimensiones"] {
+  max-height: 60px !important;
+  width: auto !important;
+  display: block;
+  margin: 0 auto;
+}
+
+table td {
+    max-width: 140px;
+    overflow: hidden;
+}
+
+
+
+table td {
+    max-width: 140px;
+    overflow: hidden;
+}
+
+/* Diseño responsivo para móviles sin desconfigurar escritorio */
+@media (max-width: 600px) {
+    table tr {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #ccc;
+    }
+
+    table td {
+        width: 100% !important;
+        text-align: center;
+        padding: 10px;
+    }
+
+    
+/* Estilo específico para el logo (marca) */
+img[alt="Marca"] {
+  max-width: 100px !important;
+  height: auto !important;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Estilos para imágenes de la tabla (Nombre, Material, Dimensiones) */
+img[alt="Descripción"],
+img[alt="Material"],
+img[alt="Dimensiones"] {
+  max-height: 60px !important;
+  width: auto !important;
+  display: block;
+  margin: 0 auto;
+}
+
+}
+
+/* Ocultar imágenes vacías */
+img[src=""] {
+    display: none;
+}
+
+
+
+table td {
+    max-width: 140px;
+    overflow: hidden;
+    vertical-align: middle;
+    text-align: left;
+}
+
+/* Mobile layout refinado para ocupar 100% del ancho sin espacios */
+@media (max-width: 600px) {
+    table {
+  margin: 0 auto;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    table tr {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        margin: 0;
+        border-bottom: 1px solid #ccc;
+    }
+
+    table td {
+        width: 100% !important;
+        text-align: center !important;
+        padding: 10px 5px;
+        box-sizing: border-box;
+    }
+
+    
+/* Estilo específico para el logo (marca) */
+img[alt="Marca"] {
+  max-width: 100px !important;
+  height: auto !important;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Estilos para imágenes de la tabla (Nombre, Material, Dimensiones) */
+img[alt="Descripción"],
+img[alt="Material"],
+img[alt="Dimensiones"] {
+  max-height: 60px !important;
+  width: auto !important;
+  display: block;
+  margin: 0 auto;
+}
+
+}
+
+/* Ocultar imágenes vacías */
+img[src=""] {
+    display: none;
+}
+
+
+
+/* Estilo específico para el logo (marca) */
+img[alt="Marca"] {
+  max-width: 100px !important;
+  height: auto !important;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Estilos para imágenes de la tabla (Nombre, Material, Dimensiones) */
+img[alt="Descripción"],
+img[alt="Material"],
+img[alt="Dimensiones"] {
+  max-height: 60px !important;
+  width: auto !important;
+  display: block;
+  margin: 0 auto;
+}
+
+
+
+.easy-ficha-wrapper * {
+  all: revert;
+  box-sizing: border-box;
+}
+@media (max-width: 600px) {
+  .easy-ficha-wrapper table {
+    width: 100% !important;
+    margin: 0 auto !important;
+  }
+  .easy-ficha-wrapper table tr {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    margin-bottom: 20px !important;
+    border-bottom: 1px solid #ccc !important;
+  }
+  .easy-ficha-wrapper table td {
+    width: 100% !important;
+    text-align: center !important;
+    padding: 10px 5px !important;
+  }
+  .easy-ficha-wrapper 
+/* Estilo específico para el logo (marca) */
+img[alt="Marca"] {
+  max-width: 100px !important;
+  height: auto !important;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Estilos para imágenes de la tabla (Nombre, Material, Dimensiones) */
+img[alt="Descripción"],
+img[alt="Material"],
+img[alt="Dimensiones"] {
+  max-height: 60px !important;
+  width: auto !important;
+  display: block;
+  margin: 0 auto;
+}
+
+}
+
+
+.video-container {
+  width: 100% !important;
+  display: block;
+  margin: 0 auto;
+
+  margin-top: 0 !important;
+  padding-top: 10px !important;
+}
+
+.video-container iframe {
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 16 / 9;
+  display: block;
+}
+
+@media (max-width: 600px) {
+  .easy-ficha-wrapper {
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 auto !important;
+  }
+  .easy-ficha-wrapper table {
+    width: 100% !important;
+  }
+  .easy-ficha-wrapper tr,
+  .easy-ficha-wrapper td {
+    display: block !important;
+    width: 100% !important;
+    text-align: center !important;
+    padding: 10px 5px !important;
+    box-sizing: border-box !important;
+  }
+  .easy-ficha-wrapper td img {
+    margin: 0 auto 10px auto !important;
+    display: block !important;
+    max-height: 60px !important;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain !important;
+  }
+  .video-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    padding-top: 10px !important;
+  }
+  .video-container iframe {
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 16 / 9;
+    display: block !important;
+  }
+}
 </style>
+
 </head>
 <body>
 <div class="header">📦 Creador de descripciones Regional</div>
@@ -118,7 +369,7 @@ function updateTables() {
         container.innerHTML = '<p>❌ No hay datos cargados. Por favor sube un Excel primero.</p>';
         return;
     }
-    let html = '<div style="display: flex; flex-wrap: wrap; gap: 20px;">';
+    let html = '<div class="easy-ficha-wrapper" style="display: flex; flex-wrap: wrap; gap: 20px;">';
     const rows = excelData.slice(1);
     rows.forEach((row, index) => {
         const [sku, marca, descripcion, material, dimensiones, imgMarca, imgDesc, imgMaterial, imgDimensiones, descripcionProducto, videoUrl, metaDescripcion] = row;
@@ -133,14 +384,14 @@ const cta = metaDescripcion?.trim() || callToActions[Math.floor(Math.random() * 
 <div style='margin-bottom:15px; background:#f4f6f7; color:#333; font-size:15px; padding:12px 20px; border-radius:8px; line-height:1.6; '>${cta}</div>
 ${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent; color:#000; font-size:15px; padding:12px 20px; border-radius:8px;'>${formatDescripcionHTML(descripcionProducto)}</div>` : ''}
 <div style='border:1px solid #ddd; border-radius:8px; background:#fff;'>
-<h3 style='background:#2c3e50;color:white;padding:15px;margin:0; text-align:center; border-radius:8px 8px 0 0;'>Nuestros Productos | Ficha técnica y especificaciones</h3>
+<h3 style='background:#2c3e50;color:white;padding:15px;margin:0; text-align:center; border-radius:8px 8px 0 0;'>Nuestros Productos<br>Ficha técnica y especificaciones</h3>
 <table style='width:100%; border-collapse:collapse;'>`;
         if (marca) html += `<tr style='border-bottom:1px solid #ddd;'><td style='width:120px;padding:15px;'><img src='${imgMarca || ''}' alt='Marca'></td><td style='padding:15px;'><b>Descripción de la Marca:</b> ${marca}</td></tr>`;
         if (descripcion) html += `<tr style='border-bottom:1px solid #ddd;'><td style='padding:15px;'><img src='${imgDesc || ''}' alt='Descripción'></td><td style='padding:15px;'><b>Nombre del Producto:</b> ${descripcion}</td></tr>`;
         if (material) html += `<tr style='border-bottom:1px solid #ddd;'><td style='padding:15px;'><img src='${imgMaterial || ''}' alt='Material'></td><td style='padding:15px;'><b>Material:</b> ${material}</td></tr>`;
-        if (dimensiones) html += `<tr><td style='padding:15px;'><img src='${imgDimensiones || ''}' alt='Dimensiones'></td><td style='padding:15px;'><b>Dimensiones:</b> ${dimensiones}</td></tr>`;
+        if (dimensiones && dimensiones.trim() !== '') html += `<tr><td style='padding:15px;'><img src='${imgDimensiones || ''}' alt='Dimensiones'></td><td style='padding:15px;'><b>Dimensiones:</b> ${dimensiones}</td></tr>`;
         html += `</table></div>`;
-        if (embedUrl) html += `<div style='margin-top:15px;'><iframe width='100%' height='220' src='${embedUrl}' frameborder='0' allowfullscreen></iframe></div>`;
+        if (embedUrl) html += `<div class='video-container' style='margin-top:0;padding-top:10px;'><iframe width='100%' height='auto' src='${embedUrl}' frameborder='0' allowfullscreen></iframe></div>`;
         html += `</div>`;
     });
     html += '</div>';
@@ -162,14 +413,14 @@ const cta = metaDescripcion?.trim() || callToActions[Math.floor(Math.random() * 
 <div class="meta-descripcion" style='margin-bottom:15px; background:#f4f6f7; color:#333; font-size:15px; padding:12px 20px; border-radius:8px; font-weight:normal;'>${cta}</div>
 ${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent; color:#000; font-size:15px; padding:12px 20px; border-radius:8px;'>${formatDescripcionHTML(descripcionProducto)}</div>` : ''}
 <div style='border:1px solid #ddd; border-radius:8px;'>
-<h3 style='background:#2c3e50;color:white;padding:15px;margin:0; text-align:center;'>Nuestros Productos | Ficha técnica y especificaciones</h3>
+<h3 style='background:#2c3e50;color:white;padding:15px;margin:0; text-align:center;'>Nuestros Productos<br>Ficha técnica y especificaciones</h3>
 <table style='width:100%; border-collapse:collapse;'>`;
         if (marca) html += `<tr style='border-bottom:1px solid #ddd;'><td style='width:120px;padding:15px;'><img src='${imgMarca || ''}'></td><td style='padding:15px;'><b>Descripción de la Marca:</b> ${marca}</td></tr>`;
         if (descripcion) html += `<tr style='border-bottom:1px solid #ddd;'><td style='padding:15px;'><img src='${imgDesc || ''}'></td><td style='padding:15px;'><b>Nombre del Producto:</b> ${descripcion}</td></tr>`;
         if (material) html += `<tr style='border-bottom:1px solid #ddd;'><td style='padding:15px;'><img src='${imgMaterial || ''}'></td><td style='padding:15px;'><b>Material:</b> ${material}</td></tr>`;
         if (dimensiones) html += `<tr><td style='padding:15px;'><img src='${imgDimensiones || ''}'></td><td style='padding:15px;'><b>Dimensiones:</b> ${dimensiones}</td></tr>`;
         html += `</table></div>`;
-        if (embedUrl) html += `<div style='margin-top:15px;'><iframe width='100%' height='220' src='${embedUrl}' frameborder='0' allowfullscreen></iframe></div>`;
+        if (embedUrl) html += `<div class='video-container' style='margin-top:0;padding-top:10px;'><iframe width='100%' height='auto' src='${embedUrl}' frameborder='0' allowfullscreen></iframe></div>`;
         html += `</div>`;
         data.push([sku, html]);
     });
