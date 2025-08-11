@@ -354,6 +354,13 @@ function cleanYoutubeUrl(url) {
     return cleanUrl.split('?')[0];
 }
 
+function formatMetaDescripcion(texto) {
+    if (!texto) return '';
+    const style = "margin-bottom:15px; background:#f4f6f7; color:#333; font-size:15px; padding:12px 20px; border-radius:8px; font-weight:normal;";
+    const bloques = texto.trim().split(/\r?\n\r?\n/);
+    return bloques.map(b => `<p style='${style}'>${b.replace(/\r?\n/g, '<br>')}</p>`).join('');
+}
+
 function downloadTemplate() {
     const link = document.createElement('a');
     link.href = 'https://catalogo2025.github.io/descripciones-regionales/plantilla_ejemplo.xlsx';
@@ -424,7 +431,7 @@ const cta = metaDescripcion?.trim() || callToActions[Math.floor(Math.random() * 
         const embedUrl = cleanYoutubeUrl(videoUrl);
         let html = `<div style='margin-bottom:25px; background:#fff;'>
 <h3 style='margin-bottom:15px; color:#2c3e50;'>${descripcion || ''}</h3>
-<div class="meta-descripcion" style='margin-bottom:15px; background:#f4f6f7; color:#333; font-size:15px; padding:12px 20px; border-radius:8px; font-weight:normal;'>${cta}</div>
+${formatMetaDescripcion(cta)}
 ${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent; color:#000; font-size:15px; padding:12px 20px; border-radius:8px;'>${formatDescripcionHTML(descripcionProducto)}</div>` : ''}
 <div style='border:1px solid #ddd; border-radius:8px;'>
 <h3 style='background:#2c3e50;color:white;padding:15px;margin:0; text-align:center;'>Nuestros Productos<br>Ficha técnica y especificaciones</h3>
