@@ -10,10 +10,9 @@
 function formatDescripcionHTML(textoPlano) {
     if (!textoPlano) return '';
     let html = textoPlano
-        .replace(/\*(.*?)\*/g, '<b>$1</b>')                          // Negrita entre * *
-        .replace(/(^|\n)##\s*(.+)/g, '$1<b>$2</b>')                  // Títulos con ##
-        .replace(/\r?\n\r?\n/g, '</p><p>')                         // Párrafos dobles
-        .replace(/\r?\n/g, '<br>');                                  // Salto simple
+        .replace(/\*(.*?)\*/g, '<b>$1</b>')            // Negrita entre * *
+        .replace(/(^|\n)##\s*(.+)/g, '$1<br><b>$2</b>') // Subtítulos con ## (antepone 1 salto)
+        .replace(/\r?\n/g, '<br>');                     // Un solo salto de línea
     return `<p>${html}</p>`;
 }
 </script>
@@ -229,8 +228,8 @@ img[alt="Dimensiones"] {
   width: 50px !important;
   height: 50px !important;
   object-fit: contain !important;
-  display: block;
-  margin: 0 auto;
+  display: block !important;
+  margin: 0 auto !important;
 }
 
 }
