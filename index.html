@@ -398,12 +398,38 @@ function updateTables() {
 const cta = metaDescripcion?.trim() || callToActions[Math.floor(Math.random() * callToActions.length)];
 
         const embedUrl = cleanYoutubeUrl(videoUrl);
+        const botonTexto = row[12]; // "Archivo Descargable (Botón)"
+        const botonUrl = row[13];   // URL del recurso descargable
+
+        let botonHTML = '';
+        if (botonTexto && botonUrl) {
+          botonHTML = `
+            <div style='margin: 15px 0;'>
+              <a href='${botonUrl}' target='_blank' style='
+                display:inline-block;
+                background-color:#922b21;
+                color:#fff;
+                padding:12px 20px;
+                border-radius:6px;
+                font-weight:bold;
+                text-decoration:none;
+                box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+                transition: all 0.2s ease-in-out;
+              ' onmouseover="this.style.boxShadow='0 5px 12px rgba(0,0,0,0.2)'"
+                 onmouseout="this.style.boxShadow='0 3px 6px rgba(0,0,0,0.1)'">
+                ${botonTexto}
+              </a>
+            </div>
+          `;
+        }
+
+
         html += `<div style='flex: 1 1 400px; margin-bottom:25px; background:#fff;'>
 <div class='visual-id'>Ficha N° ${index + 1}</div>
 <div style='display:inline-block; background:#f4f6f7; color:#333; font-size:13px; padding:4px 10px; border-radius:6px; margin-top:6px;'>📦 SKU: ${sku || ''}</div>
 <h3 style='margin-bottom:15px; color:#2c3e50;'>${descripcion || ''}</h3>
 <div style='margin-bottom:15px; background:#f4f6f7; color:#333; font-size:15px; padding:12px 20px; border-radius:8px; line-height:1.6; '>${cta}</div>
-${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent; color:#000; font-size:15px; padding:12px 20px; border-radius:8px;'>${formatDescripcionHTML(descripcionProducto)}</div>` : ''}
+${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent; color:#000; font-size:15px; padding:12px 20px; border-radius:8px;'>${formatDescripcionHTML(descripcionProducto)}</div>` : ''} ${botonHTML}
 <div style='border:1px solid #ddd; border-radius:8px; background:#fff;'>
 <h3 style='background:#2c3e50;color:white;padding:15px;margin:0; text-align:center; border-radius:8px 8px 0 0;'>Nuestros Productos<br>Ficha técnica y especificaciones</h3>
 <table style='width:100%; border-collapse:collapse;'>`;
@@ -429,10 +455,36 @@ function exportHtmlToExcel() {
 const cta = metaDescripcion?.trim() || callToActions[Math.floor(Math.random() * callToActions.length)];
 
         const embedUrl = cleanYoutubeUrl(videoUrl);
+        const botonTexto = row[12]; // "Archivo Descargable (Botón)"
+        const botonUrl = row[13];   // URL del recurso descargable
+
+        let botonHTML = '';
+        if (botonTexto && botonUrl) {
+          botonHTML = `
+            <div style='margin: 15px 0;'>
+              <a href='${botonUrl}' target='_blank' style='
+                display:inline-block;
+                background-color:#922b21;
+                color:#fff;
+                padding:12px 20px;
+                border-radius:6px;
+                font-weight:bold;
+                text-decoration:none;
+                box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+                transition: all 0.2s ease-in-out;
+              ' onmouseover="this.style.boxShadow='0 5px 12px rgba(0,0,0,0.2)'"
+                 onmouseout="this.style.boxShadow='0 3px 6px rgba(0,0,0,0.1)'">
+                ${botonTexto}
+              </a>
+            </div>
+          `;
+        }
+
+
         let html = `<div style='margin-bottom:25px; background:#fff;'>
 <h3 style='margin-bottom:15px; color:#2c3e50;'>${descripcion || ''}</h3>
 ${formatMetaDescripcion(cta)}
-${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent; color:#000; font-size:15px; padding:12px 20px; border-radius:8px;'>${formatDescripcionHTML(descripcionProducto)}</div>` : ''}
+${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent; color:#000; font-size:15px; padding:12px 20px; border-radius:8px;'>${formatDescripcionHTML(descripcionProducto)}</div>` : ''} ${botonHTML}
 <div style='border:1px solid #ddd; border-radius:8px;'>
 <h3 style='background:#2c3e50;color:white;padding:15px;margin:0; text-align:center;'>Nuestros Productos<br>Ficha técnica y especificaciones</h3>
 <table style='width:100%; border-collapse:collapse;'>`;
