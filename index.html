@@ -22,7 +22,7 @@ function formatDescripcionHTML(textoPlano) {
         // Encabezado "## Título" -> <br><h4><b>Título</b></h4> (con salto ANTES y sin salto después)
         const h = line.match(/^##\s*(.+)/);
         if (h) {
-            const hdr = '<h4 style="margin:8px 0 0 0;"><b>' + h[1].trim() + '</b></h4>';
+            const hdr = '<h4 style="margin:6px 0 0 0;"><b>' + h[1].trim() + '</b></h4>';
             if (out.length > 0) {
                 out.push('<br class="pre-h4">' + hdr);
             } else {
@@ -39,7 +39,7 @@ function formatDescripcionHTML(textoPlano) {
                 items.push(lines[i].replace(/^\s*-\s+/, '').trim());
                 i++;
             }
-            out.push("<ul class='ul-text'>" + items.map(li => "<li>" + li + "</li>").join('') + "</ul>");
+            out.push("<ul style='list-style:none;margin:0;padding-left:0;'>" + items.map(li => "<li style='margin:0;line-height:1.6;'>- " + li + "</li>").join("") + "</ul>");
             continue;
         }
 
@@ -47,7 +47,7 @@ function formatDescripcionHTML(textoPlano) {
         if (line.includes(';')) {
             const items = line.split(';').map(s => s.trim()).filter(Boolean);
             if (items.length >= 2) {
-                out.push("<ul class='ul-text'>" + items.map(li => "<li>" + li + "</li>").join('') + "</ul>");
+                out.push("<ul style='list-style:none;margin:0;padding-left:0;'>" + items.map(li => "<li style='margin:0;line-height:1.6;'>- " + li + "</li>").join("") + "</ul>");
                 i++;
                 continue;
             }
@@ -121,6 +121,7 @@ br.pre-h4{display:block;margin:0 0 0 0;}
 .ul-text{list-style:none;margin:0;padding-left:0;}
 .ul-text li{margin:0;line-height:1.6;}
 .ul-text li::before{content:"- ";}
+
 </style>
 </head>
 <body>
