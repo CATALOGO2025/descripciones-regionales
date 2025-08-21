@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="es">
 <head>
 <meta charset="utf-8"/>
@@ -9,11 +8,25 @@
 <script>
 function formatDescripcionHTML(textoPlano) {
     if (!textoPlano) return '';
-    let html = textoPlano
-        .replace(/\*(.*?)\*/g, '<b>$1</b>')            // Negrita entre * *
-        .replace(/(^|\n)##\s*(.+)/g, '$1<br><b>$2</b>') // Subtítulos con ## (antepone 1 salto)
-        .replace(/\r?\n/g, '<br>');                     // Un solo salto de línea
-    return `<p>${html}</p>`;
+    let t = String(textoPlano).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    // Forzar que '##' empiece en línea nueva si viene pegado a un párrafo anterior
+    t = t.replace(/\s+##/g, '\n##');
+
+    // Negrita entre * *
+    t = t.replace(/\*(.*?)\*/g, '<b>$1</b>');
+
+    // Titulares ## -> <h4><b>...</b></h4>, con un <br> ANTES y sin salto después
+    t = t.replace(/(^|\n)##\s*(.+)/g, function(_, prefix, title){
+        const before = prefix ? '<br>' : '';
+        return before + '<h4 style="margin:6px 0 0 0;"><b>' + title.trim() + '</b></h4>';
+    });
+
+    // Eliminar el salto de línea inmediatamente DESPUÉS de un h4
+    t = t.replace(/<\/h4>\n+/g, '</h4>');
+
+    // Convertir el resto de saltos simples a <br>
+    t = t.replace(/\n/g, '<br>');
+    return t;
 }
 </script>
 <style>body { font-family: Calibri, sans-serif; margin: 0; background-color: #f4f6f7; font-size: 14px; }
@@ -33,7 +46,6 @@ function formatDescripcionHTML(textoPlano) {
   font-weight: bold !important;
   display: inline-block !important;
 }
-
 
 /* Estilo específico para el logo (marca) */
 img[alt="Marca"] {
@@ -59,8 +71,6 @@ table td {
     overflow: hidden;
 }
 
-
-
 table td {
     max-width: 140px;
     overflow: hidden;
@@ -81,7 +91,6 @@ table td {
         padding: 10px;
     }
 
-    
 /* Estilo específico para el logo (marca) */
 img[alt="Marca"] {
   max-width: 100px !important;
@@ -107,8 +116,6 @@ img[alt="Dimensiones"] {
 img[src=""] {
     display: none;
 }
-
-
 
 table td {
     max-width: 140px;
@@ -141,7 +148,6 @@ table td {
         box-sizing: border-box;
     }
 
-    
 /* Estilo específico para el logo (marca) */
 img[alt="Marca"] {
   max-width: 100px !important;
@@ -168,8 +174,6 @@ img[src=""] {
     display: none;
 }
 
-
-
 /* Estilo específico para el logo (marca) */
 img[alt="Marca"] {
   max-width: 100px !important;
@@ -188,8 +192,6 @@ img[alt="Dimensiones"] {
   display: block;
   margin: 0 auto;
 }
-
-
 
 .easy-ficha-wrapper * {
   all: revert;
@@ -234,12 +236,10 @@ img[alt="Dimensiones"] {
 
 }
 
-
 .video-container {
   width: 100% !important;
   display: block;
   margin: 0 auto;
-
   margin-top: 0 !important;
   padding-top: 10px !important;
 }
@@ -308,15 +308,17 @@ img[alt="Dimensiones"] {
             padding: 20px;
             margin-bottom: 30px;">
   
+  
   <h3 style="margin-top: 0; color: #7d6608;">📌 <b>Directrices</b></h3>
   <ul style="line-height:1.7; color: #000; margin: 0;">
-    <li><b>Descripción de la Marca:</b> Se debe usar la que está adjunta en el Excel tipo en la descarga.</li>
+    <li><b>Descripción corta:</b> Máximo 160 caracteres.</li>
+    <li><b>Descripción larga:</b> Este campo se convierte en texto HTML. Usa palabras *entre asteriscos* para poner en negrita, y ## antes de títulos para destacarlos.</li>
+    <li><b>Descripción de la Marca:</b> Easy &gt; Usa el archivo "Descripciones Marcas y urls" desde SharePoint.</li>
     <li><b>Imagen de Marca:</b> La URL debe estar en nuestros servidores internos. No se permiten URLs externas.</li>
-    <li><b>Descripción del Producto:</b> Este campo se convierte en texto HTML. Usa palabras *entre asteriscos* para poner en negrita, y ## antes de títulos para destacarlos.</li>
     <li><b>Video YouTube:</b> Se acepta tanto la URL corta como la larga para incrustar videos.</li>
-    <li><b>Meta Descripción:</b> Máximo 160 caracteres.</li>
     <li><b>Descarga de documentos:</b> Selecciona en el Excel el botón que se acomode a tu necesidad más la URL del archivo.</li>
   </ul>
+
 
 </div>
 <button onclick="updateTables()">👁️ Visualizar Tablas</button>
@@ -327,7 +329,7 @@ img[alt="Dimensiones"] {
 </div>
 <div class="card" id="tablesContainer"></div>
 <script>
-let excelData = [];
+let excelRows = []; // arreglo de objetos (por cabecera)
 const callToActions = [
     '¡Descubre la calidad y estilo de este producto ideal para tu día a día!',
     'Mejora tu experiencia con un producto pensado para ti. ¡Adquiérelo ahora!',
@@ -380,28 +382,53 @@ function importExcel() {
         const data = new Uint8Array(e.target.result);
         const workbook = XLSX.read(data, {type: 'array'});
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        excelData = XLSX.utils.sheet_to_json(sheet, {header:1});
+
+        // Leer como objetos mapeados por cabecera
+        excelRows = XLSX.utils.sheet_to_json(sheet, { defval: "", raw: false });
+
+        if (!excelRows.length) {
+            alert('❌ No se encontraron filas en el Excel.');
+            return;
+        }
         alert('📁 Excel cargado correctamente. Puedes visualizar las tablas.');
     };
     reader.readAsArrayBuffer(file);
 }
 
+// Helper para obtener campo por nombre de cabecera, tolerante a variantes
+function get(row, keys) {
+    for (const k of keys) {
+        if (k in row && row[k] !== undefined && row[k] !== null) return String(row[k]);
+    }
+    return "";
+}
+
 function updateTables() {
     const container = document.getElementById('tablesContainer');
-    if (excelData.length < 2) {
+    if (!excelRows.length) {
         container.innerHTML = '<p>❌ No hay datos cargados. Por favor sube un Excel primero.</p>';
         return;
     }
     let html = '<div class="easy-ficha-wrapper" style="display: flex; flex-wrap: wrap; gap: 20px;">';
-    const rows = excelData.slice(1);
-    rows.forEach((row, index) => {
-        const [sku, marca, descripcion, material, dimensiones, imgMarca, imgDesc, imgMaterial, imgDimensiones, descripcionProducto, videoUrl, metaDescripcion] = row;
-        
-const cta = metaDescripcion?.trim() || callToActions[Math.floor(Math.random() * callToActions.length)];
 
+    excelRows.forEach((row, index) => {
+        const sku = get(row, ['SKU']);
+        const marca = get(row, ['Descripción de la Marca','Descripcion de la Marca','Descripción Marca']);
+        const descripcion = get(row, ['Nombre del Producto','Nombre Producto','Producto']);
+        const material = get(row, ['Material']);
+        const dimensiones = get(row, ['Dimensiones']);
+        const imgMarca = get(row, ['URL Imagen Marca','URL Imagen Marca ']);
+        const imgDesc = get(row, ['URL Imagen Descripción','URL Imagen Descripcion']);
+        const imgMaterial = get(row, ['URL Imagen Material']);
+        const imgDimensiones = get(row, ['URL Imagen Dimensiones']);
+        const descripcionProducto = get(row, ['Descripción larga','Descripcion larga','Descripción Larga','Descripcion Larga','Descripción']);
+        const videoUrl = get(row, ['VideoYouTube','Video YouTube','YouTube']);
+        const metaDescripcion = get(row, ['Meta Descripción','Meta Descripcion','Descripción corta','Descripcion corta']);
+        const botonTexto = get(row, ['Archivo Descargable (Botón)','Archivo Descargable (Boton)','Texto Botón','Texto Boton']);
+        const botonUrl = get(row, ['URL archivo descargable','URL Archivo Descargable','URL botón','URL Boton','Manual de uso URL']);
+
+        const cta = metaDescripcion.trim() || callToActions[Math.floor(Math.random() * callToActions.length)];
         const embedUrl = cleanYoutubeUrl(videoUrl);
-        const botonTexto = row[12]; // "Archivo Descargable (Botón)"
-        const botonUrl = row[13];   // URL del recurso descargable
 
         let botonHTML = '';
         if (botonTexto && botonUrl) {
@@ -425,20 +452,19 @@ const cta = metaDescripcion?.trim() || callToActions[Math.floor(Math.random() * 
           `;
         }
 
-
         html += `<div style='flex: 1 1 400px; margin-bottom:25px; background:#fff;'>
 <div class='visual-id'>Ficha N° ${index + 1}</div>
-<div style='display:inline-block; background:#f4f6f7; color:#333; font-size:13px; padding:4px 10px; border-radius:6px; margin-top:6px;'>📦 SKU: ${sku || ''}</div>
-<h3 style='margin-bottom:15px; color:#2c3e50;'>${descripcion || ''}</h3>
+<div style='display:inline-block; background:#f4f6f7; color:#333; font-size:13px; padding:4px 10px; border-radius:6px; margin-top:6px;'>📦 SKU: ${sku}</div>
+<h3 style='margin-bottom:15px; color:#2c3e50;'>${descripcion}</h3>
 <div style='margin-bottom:15px; background:#f4f6f7; color:#333; font-size:15px; padding:12px 20px; border-radius:8px; line-height:1.6; '>${cta}</div>
 ${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent; color:#000; font-size:15px; padding:12px 20px; border-radius:8px;'>${formatDescripcionHTML(descripcionProducto)}</div>` : ''} ${botonHTML}
 <div style='border:1px solid #ddd; border-radius:8px; background:#fff;'>
 <h3 style='background:#2c3e50;color:white;padding:15px;margin:0; text-align:center; border-radius:8px 8px 0 0;'>Nuestros Productos<br>Ficha técnica y especificaciones</h3>
 <table style='width:100%; border-collapse:collapse;'>`;
-        if (marca) html += `<tr style='border-bottom:1px solid #ddd;'><td style='width:120px;padding:15px;'><img src='${imgMarca || ''}' alt='Marca'></td><td style='padding:15px;'><b>Descripción de la Marca:</b> ${marca}</td></tr>`;
-        if (descripcion) html += `<tr style='border-bottom:1px solid #ddd;'><td style='padding:15px;'><img src='${imgDesc || ''}' alt='Descripción'></td><td style='padding:15px;'><b>Nombre del Producto:</b> ${descripcion}</td></tr>`;
-        if (material) html += `<tr style='border-bottom:1px solid #ddd;'><td style='padding:15px;'><img src='${imgMaterial || ''}' alt='Material'></td><td style='padding:15px;'><b>Material:</b> ${material}</td></tr>`;
-        if (dimensiones && dimensiones.trim() !== '') html += `<tr><td style='padding:15px;'><img src='${imgDimensiones || ''}' alt='Dimensiones'></td><td style='padding:15px;'><b>Dimensiones:</b> ${dimensiones}</td></tr>`;
+        if (marca) html += `<tr style='border-bottom:1px solid #ddd;'><td style='width:120px;padding:15px;'><img src='${imgMarca}' alt='Marca'></td><td style='padding:15px;'><b>Descripción de la Marca:</b> ${marca}</td></tr>`;
+        if (descripcion) html += `<tr style='border-bottom:1px solid #ddd;'><td style='padding:15px;'><img src='${imgDesc}' alt='Descripción'></td><td style='padding:15px;'><b>Nombre del Producto:</b> ${descripcion}</td></tr>`;
+        if (material) html += `<tr style='border-bottom:1px solid #ddd;'><td style='padding:15px;'><img src='${imgMaterial}' alt='Material'></td><td style='padding:15px;'><b>Material:</b> ${material}</td></tr>`;
+        if (dimensiones && dimensiones.trim() !== '') html += `<tr><td style='padding:15px;'><img src='${imgDimensiones}' alt='Dimensiones'></td><td style='padding:15px;'><b>Dimensiones:</b> ${dimensiones}</td></tr>`;
         html += `</table></div>`;
         if (embedUrl) html += `<div class='video-container' style='margin-top:0;padding-top:10px;'><iframe width='100%' height='auto' src='${embedUrl}' frameborder='0' allowfullscreen></iframe></div>`;
         html += `</div>`;
@@ -448,17 +474,27 @@ ${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent;
 }
 
 function exportHtmlToExcel() {
-    if (excelData.length < 2) return alert('❌ No hay datos cargados para exportar.');
-    const rows = excelData.slice(1);
-    const data = [['SKU', 'Descripción Larga']];
-    rows.forEach(row => {
-        const [sku, marca, descripcion, material, dimensiones, imgMarca, imgDesc, imgMaterial, imgDimensiones, descripcionProducto, videoUrl, metaDescripcion] = row;
-        
-const cta = metaDescripcion?.trim() || callToActions[Math.floor(Math.random() * callToActions.length)];
+    if (!excelRows.length) return alert('❌ No hay datos cargados para exportar.');
 
+    const data = [['SKU', 'Descripción Larga']];
+    excelRows.forEach((row) => {
+        const sku = get(row, ['SKU']);
+        const marca = get(row, ['Descripción de la Marca','Descripcion de la Marca','Descripción Marca']);
+        const descripcion = get(row, ['Nombre del Producto','Nombre Producto','Producto']);
+        const material = get(row, ['Material']);
+        const dimensiones = get(row, ['Dimensiones']);
+        const imgMarca = get(row, ['URL Imagen Marca','URL Imagen Marca ']);
+        const imgDesc = get(row, ['URL Imagen Descripción','URL Imagen Descripcion']);
+        const imgMaterial = get(row, ['URL Imagen Material']);
+        const imgDimensiones = get(row, ['URL Imagen Dimensiones']);
+        const descripcionProducto = get(row, ['Descripción larga','Descripcion larga','Descripción Larga','Descripcion Larga','Descripción']);
+        const videoUrl = get(row, ['VideoYouTube','Video YouTube','YouTube']);
+        const metaDescripcion = get(row, ['Meta Descripción','Meta Descripcion','Descripción corta','Descripcion corta']);
+        const botonTexto = get(row, ['Archivo Descargable (Botón)','Archivo Descargable (Boton)','Texto Botón','Texto Boton']);
+        const botonUrl = get(row, ['URL archivo descargable','URL Archivo Descargable','URL botón','URL Boton','Manual de uso URL']);
+
+        const cta = metaDescripcion.trim() || callToActions[Math.floor(Math.random() * callToActions.length)];
         const embedUrl = cleanYoutubeUrl(videoUrl);
-        const botonTexto = row[12]; // "Archivo Descargable (Botón)"
-        const botonUrl = row[13];   // URL del recurso descargable
 
         let botonHTML = '';
         if (botonTexto && botonUrl) {
@@ -482,23 +518,23 @@ const cta = metaDescripcion?.trim() || callToActions[Math.floor(Math.random() * 
           `;
         }
 
-
         let html = `<div style='margin-bottom:25px; background:#fff;'>
-<h3 style='margin-bottom:15px; color:#2c3e50;'>${descripcion || ''}</h3>
+<h3 style='margin-bottom:15px; color:#2c3e50;'>${descripcion}</h3>
 ${formatMetaDescripcion(cta)}
 ${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent; color:#000; font-size:15px; padding:12px 20px; border-radius:8px;'>${formatDescripcionHTML(descripcionProducto)}</div>` : ''} ${botonHTML}
 <div style='border:1px solid #ddd; border-radius:8px;'>
 <h3 style='background:#2c3e50;color:white;padding:15px;margin:0; text-align:center;'>Nuestros Productos<br>Ficha técnica y especificaciones</h3>
 <table style='width:100%; border-collapse:collapse;'>`;
-        if (marca) html += `<tr style='border-bottom:1px solid #ddd;'><td style='width:120px;padding:15px;'><img src='${imgMarca || ''}'></td><td style='padding:15px;'><b>Descripción de la Marca:</b> ${marca}</td></tr>`;
-        if (descripcion) html += `<tr style='border-bottom:1px solid #ddd;'><td style='padding:15px;'><img src='${imgDesc || ''}'></td><td style='padding:15px;'><b>Nombre del Producto:</b> ${descripcion}</td></tr>`;
-        if (material) html += `<tr style='border-bottom:1px solid #ddd;'><td style='padding:15px;'><img src='${imgMaterial || ''}'></td><td style='padding:15px;'><b>Material:</b> ${material}</td></tr>`;
-        if (dimensiones) html += `<tr><td style='padding:15px;'><img src='${imgDimensiones || ''}'></td><td style='padding:15px;'><b>Dimensiones:</b> ${dimensiones}</td></tr>`;
+        if (marca) html += `<tr style='border-bottom:1px solid #ddd;'><td style='width:120px;padding:15px;'><img src='${imgMarca}'></td><td style='padding:15px;'><b>Descripción de la Marca:</b> ${marca}</td></tr>`;
+        if (descripcion) html += `<tr style='border-bottom:1px solid #ddd;'><td style='padding:15px;'><img src='${imgDesc}'></td><td style='padding:15px;'><b>Nombre del Producto:</b> ${descripcion}</td></tr>`;
+        if (material) html += `<tr style='border-bottom:1px solid #ddd;'><td style='padding:15px;'><img src='${imgMaterial}'></td><td style='padding:15px;'><b>Material:</b> ${material}</td></tr>`;
+        if (dimensiones) html += `<tr><td style='padding:15px;'><img src='${imgDimensiones}'></td><td style='padding:15px;'><b>Dimensiones:</b> ${dimensiones}</td></tr>`;
         html += `</table></div>`;
         if (embedUrl) html += `<div class='video-container' style='margin-top:0;padding-top:10px;'><iframe width='100%' height='auto' src='${embedUrl}' frameborder='0' allowfullscreen></iframe></div>`;
         html += `</div>`;
         data.push([sku, html]);
     });
+
     const ws = XLSX.utils.aoa_to_sheet(data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Descripciones');
@@ -508,7 +544,7 @@ ${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent;
 function limpiarTodo() {
     document.getElementById('importFile').value = '';
     document.getElementById('tablesContainer').innerHTML = '<p>📂 Sin datos cargados.</p>';
-    excelData = [];
+    excelRows = [];
     alert('🧹 Se limpiaron los datos y las tablas correctamente.');
 }
 </script>
