@@ -3,346 +3,83 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Exportación de Productos Mejorada con Video Limpio</title>
+<title>Exportación de Productos Mejorada</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 <script>
 function formatDescripcionHTML(textoPlano) {
     if (!textoPlano) return '';
     let t = String(textoPlano).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-    // Forzar que '##' empiece en línea nueva si viene pegado a un párrafo anterior
-    t = t.replace(/\s+##/g, '\n##');
-
-    // Negrita entre * *
+    // Mantener regla existente: forzar '##' a nueva línea si viene pegado
+    t = t.replace(/([^\n])##/g, '$1\n##');
+    // Negritas con *...*
     t = t.replace(/\*(.*?)\*/g, '<b>$1</b>');
 
-    // Titulares ## -> <h4><b>...</b></h4>, con un <br> ANTES y sin salto después
-    t = t.replace(/(^|\n)##\s*(.+)/g, function(_, prefix, title){
-        const before = prefix ? '<br>' : '';
-        return before + '<h4 style="margin:6px 0 0 0;"><b>' + title.trim() + '</b></h4>';
-    });
+    const lines = t.split('\n');
+    let out = [];
+    for (let i = 0; i < lines.length; ) {
+        let line = lines[i];
 
-    // Eliminar el salto de línea inmediatamente DESPUÉS de un h4
-    t = t.replace(/<\/h4>\n+/g, '</h4>');
+        // Encabezado "## Título" -> <br><h4><b>Título</b></h4> (con salto ANTES y sin salto después)
+        const h = line.match(/^##\s*(.+)/);
+        if (h) {
+            const hdr = '<h4 style="margin:8px 0 0 0;"><b>' + h[1].trim() + '</b></h4>';
+            if (out.length > 0) {
+                out.push('<br class="pre-h4">' + hdr);
+            } else {
+                out.push(hdr);
+            }
+            i++;
+            continue;
+        }
 
-    // Convertir el resto de saltos simples a <br>
-    t = t.replace(/\n/g, '<br>');
-    return t;
-}
-</script>
-<style>body { font-family: Calibri, sans-serif; margin: 0; background-color: #f4f6f7; font-size: 14px; }
-    .header { background-color: #1f618d; color: white; padding: 20px; font-size: 28px; text-align: center; font-weight: bold; }
-    .card { margin: 20px; background: linear-gradient(180deg, #ffffff, #f8f9fa); border-radius: 12px; padding: 20px; box-shadow: 0 3px 10px rgba(0,0,0,0.1); border: 1px solid #ddd; }
-    h2 { border-bottom: 1px solid #ddd; padding-bottom: 10px; font-size: 20px; }
-    button { background: linear-gradient(#1f618d, #154360); color: white; border: none; padding: 12px 20px; margin-right: 10px; margin-bottom: 10px; border-radius: 6px; cursor: pointer; font-size: 14px; box-shadow: 0 3px 6px rgba(0,0,0,0.1); transition: all 0.2s ease-in-out; }
-    button:hover { transform: scale(1.02); box-shadow: 0 5px 12px rgba(0,0,0,0.15); }
-    
-    .visual-id {
-  margin-bottom: 5px;
-  background: #d6eaf8 !important;
-  color: #21618c !important;
-  font-size: 14px !important;
-  padding: 6px 12px !important;
-  border-radius: 8px !important;
-  font-weight: bold !important;
-  display: inline-block !important;
-}
+        // Lista con guion al inicio "- item"
+        if (/^\s*-\s+/.test(line)) {
+            let items = [];
+            while (i < lines.length && /^\s*-\s+(.+)$/.test(lines[i])) {
+                items.push(lines[i].replace(/^\s*-\s+/, '').trim());
+                i++;
+            }
+            out.push("<ul class='ul-text'>" + items.map(li => "<li>" + li + "</li>").join('') + "</ul>");
+            continue;
+        }
 
-/* Estilo específico para el logo (marca) */
-img[alt="Marca"] {
-  max-width: 100px !important;
-  height: auto !important;
-  display: block;
-  margin: 0 auto;
-}
+        // Lista separada por punto y coma "a; b; c"
+        if (line.includes(';')) {
+            const items = line.split(';').map(s => s.trim()).filter(Boolean);
+            if (items.length >= 2) {
+                out.push("<ul class='ul-text'>" + items.map(li => "<li>" + li + "</li>").join('') + "</ul>");
+                i++;
+                continue;
+            }
+        }
 
-/* Estilos para imágenes de la tabla (Nombre, Material, Dimensiones) */
-img[alt="Descripción"],
-img[alt="Material"],
-img[alt="Dimensiones"] {
-  width: 50px !important;
-  height: 50px !important;
-  object-fit: contain !important;
-  display: block;
-  margin: 0 auto;
-}
-
-table td {
-    max-width: 140px;
-    overflow: hidden;
-}
-
-table td {
-    max-width: 140px;
-    overflow: hidden;
-}
-
-/* Diseño responsivo para móviles sin desconfigurar escritorio */
-@media (max-width: 600px) {
-    table tr {
-        display: flex;
-        flex-direction: column;
-        margin-bottom: 20px;
-        border-bottom: 1px solid #ccc;
+        // Línea normal
+        if (line.length > 0) out.push(line);
+        i++;
     }
 
-    table td {
-        width: 100% !important;
-        text-align: center;
-        padding: 10px;
-    }
-
-/* Estilo específico para el logo (marca) */
-img[alt="Marca"] {
-  max-width: 100px !important;
-  height: auto !important;
-  display: block;
-  margin: 0 auto;
+    let html = out.join('<br>');
+    // Evitar salto inmediato después del h4
+    html = html.replace(/<\/h4><br>/g, '</h4>');
+    html = html.replace(/(<br>\s*)+(<br class=\"pre-h4\">)/g, '$2');
+    html = html.replace(/^\s*(<br class=\"pre-h4\">)+/m, '<br class="pre-h4">');
+    html = html.replace(/(<br class=\"pre-h4\">)\s*<br>/g, '$1');
+    html = html.replace(/(<br>){2,}/g, '<br>');
+    html = html.replace(/<\/h4><br>/g, '</h4>');
+    html = html.replace(/(<br>\s*)+(<br class=\"pre-h4\">)/g, '$2');
+    html = html.replace(/^\s*(<br class=\"pre-h4\">)+/m, '<br class="pre-h4">');
+    html = html.replace(/(<br class=\"pre-h4\">)\s*<br>/g, '$1');
+    html = html.replace(/(<br>\s*)+(<br class=\"pre-h4\">)/g, '$2');
+    html = html.replace(/^\s*(<br class=\"pre-h4\">)+/m, '<br class="pre-h4">');
+    html = html.replace(/(<br>){2,}/g, '<br>');
+    return html;
 }
-
-/* Estilos para imágenes de la tabla (Nombre, Material, Dimensiones) */
-img[alt="Descripción"],
-img[alt="Material"],
-img[alt="Dimensiones"] {
-  width: 50px !important;
-  height: 50px !important;
-  object-fit: contain !important;
-  display: block;
-  margin: 0 auto;
+function formatMetaDescripcion(texto) {
+    if (!texto) return '';
+    const style = "margin-bottom:15px; background:#f4f6f7; color:#333; font-size:15px; padding:12px 20px; border-radius:8px; font-weight:normal; line-height:1.6;";
+    const bloques = String(texto).trim().split(/\r?\n\r?\n/);
+    return bloques.map(b => `<p style='${style}'>${b.replace(/\r?\n/g, '<br>')}</p>`).join('');
 }
-
-}
-
-/* Ocultar imágenes vacías */
-img[src=""] {
-    display: none;
-}
-
-table td {
-    max-width: 140px;
-    overflow: hidden;
-    vertical-align: middle;
-    text-align: left;
-}
-
-/* Mobile layout refinado para ocupar 100% del ancho sin espacios */
-@media (max-width: 600px) {
-    table {
-  margin: 0 auto;
-        width: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    table tr {
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-        margin: 0;
-        border-bottom: 1px solid #ccc;
-    }
-
-    table td {
-        width: 100% !important;
-        text-align: center !important;
-        padding: 10px 5px;
-        box-sizing: border-box;
-    }
-
-/* Estilo específico para el logo (marca) */
-img[alt="Marca"] {
-  max-width: 100px !important;
-  height: auto !important;
-  display: block;
-  margin: 0 auto;
-}
-
-/* Estilos para imágenes de la tabla (Nombre, Material, Dimensiones) */
-img[alt="Descripción"],
-img[alt="Material"],
-img[alt="Dimensiones"] {
-  width: 50px !important;
-  height: 50px !important;
-  object-fit: contain !important;
-  display: block;
-  margin: 0 auto;
-}
-
-}
-
-/* Ocultar imágenes vacías */
-img[src=""] {
-    display: none;
-}
-
-/* Estilo específico para el logo (marca) */
-img[alt="Marca"] {
-  max-width: 100px !important;
-  height: auto !important;
-  display: block;
-  margin: 0 auto;
-}
-
-/* Estilos para imágenes de la tabla (Nombre, Material, Dimensiones) */
-img[alt="Descripción"],
-img[alt="Material"],
-img[alt="Dimensiones"] {
-  width: 50px !important;
-  height: 50px !important;
-  object-fit: contain !important;
-  display: block;
-  margin: 0 auto;
-}
-
-.easy-ficha-wrapper * {
-  all: revert;
-  box-sizing: border-box;
-}
-@media (max-width: 600px) {
-  .easy-ficha-wrapper table {
-    width: 100% !important;
-    margin: 0 auto !important;
-  }
-  .easy-ficha-wrapper table tr {
-    display: flex !important;
-    flex-direction: column !important;
-    width: 100% !important;
-    margin-bottom: 20px !important;
-    border-bottom: 1px solid #ccc !important;
-  }
-  .easy-ficha-wrapper table td {
-    width: 100% !important;
-    text-align: center !important;
-    padding: 10px 5px !important;
-  }
-  .easy-ficha-wrapper 
-/* Estilo específico para el logo (marca) */
-img[alt="Marca"] {
-  max-width: 100px !important;
-  height: auto !important;
-  display: block;
-  margin: 0 auto;
-}
-
-/* Estilos para imágenes de la tabla (Nombre, Material, Dimensiones) */
-img[alt="Descripción"],
-img[alt="Material"],
-img[alt="Dimensiones"] {
-  width: 50px !important;
-  height: 50px !important;
-  object-fit: contain !important;
-  display: block !important;
-  margin: 0 auto !important;
-}
-
-}
-
-.video-container {
-  width: 100% !important;
-  display: block;
-  margin: 0 auto;
-  margin-top: 0 !important;
-  padding-top: 10px !important;
-}
-
-.video-container iframe {
-  width: 100% !important;
-  height: auto !important;
-  aspect-ratio: 16 / 9;
-  display: block;
-}
-
-@media (max-width: 600px) {
-  .easy-ficha-wrapper {
-    width: 100% !important;
-    padding: 0 !important;
-    margin: 0 auto !important;
-  }
-  .easy-ficha-wrapper table {
-    width: 100% !important;
-  }
-  .easy-ficha-wrapper tr,
-  .easy-ficha-wrapper td {
-    display: block !important;
-    width: 100% !important;
-    text-align: center !important;
-    padding: 10px 5px !important;
-    box-sizing: border-box !important;
-  }
-  .easy-ficha-wrapper td img {
-    margin: 0 auto 10px auto !important;
-    display: block !important;
-    max-height: 60px !important;
-    width: auto !important;
-    height: auto !important;
-    object-fit: contain !important;
-  }
-  .video-container {
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 auto !important;
-    padding-top: 10px !important;
-  }
-  .video-container iframe {
-    width: 100% !important;
-    height: auto !important;
-    aspect-ratio: 16 / 9;
-    display: block !important;
-  }
-}
-</style>
-
-</head>
-<body>
-<div class="header">📦 Creador de descripciones Regional</div>
-<div class="card">
-<h2>📜 Instrucciones</h2>
-<ul style="line-height:1.7;">
-<li>👨‍💻 <b>Descargar Plantilla:</b> Usa el botón para descargar un Excel preformateado.</li>
-<li>📁 <b>Procesar Excel:</b> Completa los campos requeridos.</li>
-<li>👁️ <b>Previsualizar:</b> Visualizar Tablas muestra resultados.</li>
-<li>⬇️ <b>Exportar:</b> Exportar HTML a Excel descarga resultados.</li>
-</ul><div style="background: #fff9e6;
-            border-left: 6px solid #f5c518;
-            border-top-left-radius: 12px;
-            border-bottom-left-radius: 12px;
-            padding: 20px;
-            margin-bottom: 30px;">
-  
-  
-  <h3 style="margin-top: 0; color: #7d6608;">📌 <b>Directrices</b></h3>
-  <ul style="line-height:1.7; color: #000; margin: 0;">
-    <li><b>Descripción corta:</b> Máximo 160 caracteres.</li>
-    <li><b>Descripción larga:</b> Este campo se convierte en texto HTML. Usa palabras *entre asteriscos* para poner en negrita, y ## antes de títulos para destacarlos.</li>
-    <li><b>Descripción de la Marca:</b> Easy &gt; Usa el archivo "Descripciones Marcas y urls" desde SharePoint.</li>
-    <li><b>Imagen de Marca:</b> La URL debe estar en nuestros servidores internos. No se permiten URLs externas.</li>
-    <li><b>Video YouTube:</b> Se acepta tanto la URL corta como la larga para incrustar videos.</li>
-    <li><b>Descarga de documentos:</b> Selecciona en el Excel el botón que se acomode a tu necesidad más la URL del archivo.</li>
-  </ul>
-
-
-</div>
-<button onclick="updateTables()">👁️ Visualizar Tablas</button>
-<button onclick="exportHtmlToExcel()">⬇️ Exportar HTML a Excel</button>
-<button onclick="downloadTemplate()">📄 Descargar Plantilla</button>
-<button onclick="limpiarTodo()">🧹 Limpiar Todo</button>
-<input accept=".xlsx" id="importFile" onchange="importExcel()" type="file"/>
-</div>
-<div class="card" id="tablesContainer"></div>
-<script>
-let excelRows = []; // arreglo de objetos (por cabecera)
-const callToActions = [
-    '¡Descubre la calidad y estilo de este producto ideal para tu día a día!',
-    'Mejora tu experiencia con un producto pensado para ti. ¡Adquiérelo ahora!',
-    'Lleva la mejor opción en calidad y funcionalidad. ¡No dejes pasar la oportunidad!',
-    'Transforma tu espacio con este producto y sorpréndete con sus beneficios.',
-    'Obtén la combinación perfecta entre diseño y practicidad.',
-    '¡Aprovecha las cualidades únicas de este producto y eleva tu experiencia!',
-    'Tu mejor aliado para cada ocasión: descúbrelo ahora.',
-    'Diseño, confort y utilidad en un solo producto. ¡Consíguelo hoy mismo!',
-    'Renueva tu estilo, pensado para destacar en todo momento.',
-    'Encuentra la opción perfecta para tu necesidad y cómpralo ahora mismo.'
-];
-
 function cleanYoutubeUrl(url) {
     if (!url) return '';
     let cleanUrl = url.trim();
@@ -357,195 +94,214 @@ function cleanYoutubeUrl(url) {
     }
     return cleanUrl.split('?')[0];
 }
-
-function formatMetaDescripcion(texto) {
-    if (!texto) return '';
-    const style = "margin-bottom:15px; background:#f4f6f7; color:#333; font-size:15px; padding:12px 20px; border-radius:8px; font-weight:normal;";
-    const bloques = texto.trim().split(/\r?\n\r?\n/);
-    return bloques.map(b => `<p style='${style}'>${b.replace(/\r?\n/g, '<br>')}</p>`).join('');
+</script>
+<style>
+body { font-family: Calibri, sans-serif; margin: 0; background-color: #f4f6f7; font-size: 14px; }
+.header { background-color: #1f618d; color: white; padding: 20px; font-size: 28px; text-align: center; font-weight: bold; }
+.card { margin: 20px; background: linear-gradient(180deg, #ffffff, #f8f9fa); border-radius: 12px; padding: 20px; box-shadow: 0 3px 10px rgba(0,0,0,0.1); border: 1px solid #ddd; }
+h2 { border-bottom: 1px solid #ddd; padding-bottom: 10px; font-size: 20px; }
+button { background: linear-gradient(#1f618d, #154360); color: white; border: none; padding: 12px 20px; margin-right: 10px; margin-bottom: 10px; border-radius: 6px; cursor: pointer; font-size: 14px; box-shadow: 0 3px 6px rgba(0,0,0,0.1); transition: all 0.2s ease-in-out; }
+button:hover { transform: scale(1.02); box-shadow: 0 5px 12px rgba(0,0,0,0.15); }
+.visual-id { margin-bottom: 5px; background: #d6eaf8 !important; color: #21618c !important; font-size: 14px !important; padding: 6px 12px !important; border-radius: 8px !important; font-weight: bold !important; display: inline-block !important; }
+img[alt="Marca"] { max-width: 100px !important; height: auto !important; display: block; margin: 0 auto; }
+img[alt="Descripción"], img[alt="Material"], img[alt="Dimensiones"] { width: 50px !important; height: 50px !important; object-fit: contain !important; display: block; margin: 0 auto; }
+img[src=""] { display: none; }
+table td { max-width: 140px; overflow: hidden; vertical-align: middle; text-align: left; }
+@media (max-width: 600px) {
+  table { width: 100% !important; margin: 0 !important; padding: 0 !important; }
+  table tr { display: flex; flex-direction: column; width: 100%; margin: 0; border-bottom: 1px solid #ccc; }
+  table td { width: 100% !important; text-align: center !important; padding: 10px 5px; box-sizing: border-box; }
+  img[alt="Marca"] { max-width: 100px !important; height: auto !important; display: block; margin: 0 auto; }
+  img[alt="Descripción"], img[alt="Material"], img[alt="Dimensiones"] { width: 50px !important; height: 50px !important; object-fit: contain !important; display: block; margin: 0 auto; }
 }
-
+.easy-ficha-wrapper * { all: revert; box-sizing: border-box; }
+.video-container { width: 100% !important; display: block; margin: 0 auto; margin-top: 0 !important; padding-top: 10px !important; }
+.video-container iframe { width: 100% !important; height: auto !important; aspect-ratio: 16 / 9; display: block; }
+br.pre-h4{display:block;margin:0 0 0 0;}
+.ul-text{list-style:none;margin:0;padding-left:0;}
+.ul-text li{margin:0;line-height:1.6;}
+.ul-text li::before{content:"- ";}
+</style>
+</head>
+<body>
+<div class="header">📦 Creador de descripciones Regional</div>
+<div class="card">
+<h2>📜 Instrucciones</h2>
+<ul style="line-height:1.7;">
+<li>👨‍💻 <b>Descargar Plantilla:</b> Usa el botón para descargar un Excel preformateado.</li>
+<li>📁 <b>Procesar Excel:</b> Completa los campos requeridos.</li>
+<li>👁️ <b>Previsualizar:</b> Visualizar Tablas muestra resultados.</li>
+<li>⬇️ <b>Exportar:</b> Exportar HTML a Excel descarga resultados.</li>
+</ul>
+<div style="background: #fff9e6; border-left: 6px solid #f5c518; border-top-left-radius: 12px; border-bottom-left-radius: 12px; padding: 20px; margin-bottom: 30px;">
+  <h3 style="margin-top: 0; color: #7d6608;">📌 <b>Directrices</b></h3>
+  <ul style="line-height:1.7; color: #000; margin: 0;">
+    <li><b>Descripción corta:</b> Máximo 160 caracteres.</li>
+    <li><b>Descripción larga:</b> Este campo se convierte en texto HTML. Usa palabras *entre asteriscos* para poner en negrita, y ## antes de títulos para destacarlos.</li>
+    <li><b>Descripción de la Marca:</b> Easy &gt; Usa el archivo "Descripciones Marcas y urls" desde SharePoint.</li>
+    <li><b>Imagen de Marca:</b> La URL debe estar en nuestros servidores internos. No se permiten URLs externas.</li>
+    <li><b>Video YouTube:</b> Se acepta tanto la URL corta como la larga para incrustar videos.</li>
+    <li><b>Descarga de documentos:</b> Selecciona en el Excel el botón que se acomode a tu necesidad más la URL del archivo.</li>
+  </ul>
+</div>
+<button onclick="updateTables()">👁️ Visualizar Tablas</button>
+<button onclick="exportHtmlToExcel()">⬇️ Exportar HTML a Excel</button>
+<button onclick="downloadTemplate()">📄 Descargar Plantilla</button>
+<button onclick="limpiarTodo()">🧹 Limpiar Todo</button>
+<input accept=".xlsx" id="importFile" onchange="importExcel()" type="file"/>
+</div>
+<div class="card" id="tablesContainer"></div>
+<script>
+let excelRows = [];
 function downloadTemplate() {
-    const link = document.createElement('a');
-    link.href = 'https://catalogo2025.github.io/descripciones-regionales/plantilla_ejemplo.xlsx';
-    link.download = 'plantilla_ejemplo.xlsx';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const link = document.createElement('a');
+  link.href = 'https://catalogo2025.github.io/descripciones-regionales/plantilla_ejemplo.xlsx';
+  link.download = 'plantilla_ejemplo.xlsx';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
-
 function importExcel() {
-    const file = document.getElementById('importFile').files[0];
-    if (!file) return alert('Por favor selecciona un archivo Excel.');
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, {type: 'array'});
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-
-        // Leer como objetos mapeados por cabecera
-        excelRows = XLSX.utils.sheet_to_json(sheet, { defval: "", raw: false });
-
-        if (!excelRows.length) {
-            alert('❌ No se encontraron filas en el Excel.');
-            return;
-        }
-        alert('📁 Excel cargado correctamente. Puedes visualizar las tablas.');
-    };
-    reader.readAsArrayBuffer(file);
+  const file = document.getElementById('importFile').files[0];
+  if (!file) return alert('Por favor selecciona un archivo Excel.');
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const data = new Uint8Array(e.target.result);
+    const workbook = XLSX.read(data, {type: 'array'});
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    excelRows = XLSX.utils.sheet_to_json(sheet, { defval: "", raw: false });
+    if (!excelRows.length) return alert('❌ No se encontraron filas en el Excel.');
+    alert('📁 Excel cargado correctamente. Puedes visualizar las tablas.');
+  };
+  reader.readAsArrayBuffer(file);
 }
-
 // Helper para obtener campo por nombre de cabecera, tolerante a variantes
 function get(row, keys) {
-    for (const k of keys) {
-        if (k in row && row[k] !== undefined && row[k] !== null) return String(row[k]);
-    }
-    return "";
+  for (const k of keys) {
+    if (k in row && row[k] !== undefined && row[k] !== null) return String(row[k]);
+  }
+  return "";
 }
-
 function updateTables() {
-    const container = document.getElementById('tablesContainer');
-    if (!excelRows.length) {
-        container.innerHTML = '<p>❌ No hay datos cargados. Por favor sube un Excel primero.</p>';
-        return;
+  const container = document.getElementById('tablesContainer');
+  if (!excelRows.length) {
+    container.innerHTML = '<p>❌ No hay datos cargados. Por favor sube un Excel primero.</p>';
+    return;
+  }
+  let html = '<div class="easy-ficha-wrapper" style="display:flex; flex-wrap:wrap; gap:20px;">';
+  excelRows.forEach((row, index) => {
+    const sku = get(row, ['SKU']);
+    const marca = get(row, ['Descripción de la Marca','Descripcion de la Marca','Descripción Marca']);
+    const descripcion = get(row, ['Nombre del Producto','Nombre Producto','Producto']);
+    const material = get(row, ['Material']);
+    const dimensiones = get(row, ['Dimensiones']);
+    const imgMarca = get(row, ['URL Imagen Marca','URL Imagen Marca ']);
+    const imgDesc = get(row, ['URL Imagen Descripción','URL Imagen Descripcion']);
+    const imgMaterial = get(row, ['URL Imagen Material']);
+    const imgDimensiones = get(row, ['URL Imagen Dimensiones']);
+    const descripcionProducto = get(row, ['Descripción larga','Descripcion larga','Descripción Larga','Descripcion Larga','Descripción']);
+    const videoUrl = get(row, ['VideoYouTube','Video YouTube','YouTube']);
+    const metaDescripcion = get(row, ['Meta Descripción','Meta Descripcion','Descripción corta','Descripcion corta']);
+    const botonTexto = get(row, ['Archivo Descargable (Botón)','Archivo Descargable (Boton)','Texto Botón','Texto Boton']);
+    const botonUrl = get(row, ['URL archivo descargable','URL Archivo Descargable','URL botón','URL Boton','Manual de uso URL']);
+    const cta = metaDescripcion.trim(); // sin fallback
+    const embedUrl = cleanYoutubeUrl(videoUrl);
+    let botonHTML = '';
+    if (botonTexto && botonUrl) {
+      botonHTML = `
+        <div style='margin: 15px 0;'>
+          <a href='${botonUrl}' target='_blank' style='
+            display:inline-block; background-color:#922b21; color:#fff;
+            padding:12px 20px; border-radius:6px; font-weight:bold; text-decoration:none;
+            box-shadow:0 3px 6px rgba(0,0,0,0.1); transition:all 0.2s ease-in-out;
+          ' onmouseover="this.style.boxShadow='0 5px 12px rgba(0,0,0,0.2)'"
+             onmouseout="this.style.boxShadow='0 3px 6px rgba(0,0,0,0.1)'">
+            ${botonTexto}
+          </a>
+        </div>`;
     }
-    let html = '<div class="easy-ficha-wrapper" style="display: flex; flex-wrap: wrap; gap: 20px;">';
-
-    excelRows.forEach((row, index) => {
-        const sku = get(row, ['SKU']);
-        const marca = get(row, ['Descripción de la Marca','Descripcion de la Marca','Descripción Marca']);
-        const descripcion = get(row, ['Nombre del Producto','Nombre Producto','Producto']);
-        const material = get(row, ['Material']);
-        const dimensiones = get(row, ['Dimensiones']);
-        const imgMarca = get(row, ['URL Imagen Marca','URL Imagen Marca ']);
-        const imgDesc = get(row, ['URL Imagen Descripción','URL Imagen Descripcion']);
-        const imgMaterial = get(row, ['URL Imagen Material']);
-        const imgDimensiones = get(row, ['URL Imagen Dimensiones']);
-        const descripcionProducto = get(row, ['Descripción larga','Descripcion larga','Descripción Larga','Descripcion Larga','Descripción']);
-        const videoUrl = get(row, ['VideoYouTube','Video YouTube','YouTube']);
-        const metaDescripcion = get(row, ['Meta Descripción','Meta Descripcion','Descripción corta','Descripcion corta']);
-        const botonTexto = get(row, ['Archivo Descargable (Botón)','Archivo Descargable (Boton)','Texto Botón','Texto Boton']);
-        const botonUrl = get(row, ['URL archivo descargable','URL Archivo Descargable','URL botón','URL Boton','Manual de uso URL']);
-
-        const cta = metaDescripcion.trim() || callToActions[Math.floor(Math.random() * callToActions.length)];
-        const embedUrl = cleanYoutubeUrl(videoUrl);
-
-        let botonHTML = '';
-        if (botonTexto && botonUrl) {
-          botonHTML = `
-            <div style='margin: 15px 0;'>
-              <a href='${botonUrl}' target='_blank' style='
-                display:inline-block;
-                background-color:#922b21;
-                color:#fff;
-                padding:12px 20px;
-                border-radius:6px;
-                font-weight:bold;
-                text-decoration:none;
-                box-shadow: 0 3px 6px rgba(0,0,0,0.1);
-                transition: all 0.2s ease-in-out;
-              ' onmouseover="this.style.boxShadow='0 5px 12px rgba(0,0,0,0.2)'"
-                 onmouseout="this.style.boxShadow='0 3px 6px rgba(0,0,0,0.1)'">
-                ${botonTexto}
-              </a>
-            </div>
-          `;
-        }
-
-        html += `<div style='flex: 1 1 400px; margin-bottom:25px; background:#fff;'>
+    html += `<div style='flex:1 1 400px; margin-bottom:25px; background:#fff;'>
 <div class='visual-id'>Ficha N° ${index + 1}</div>
 <div style='display:inline-block; background:#f4f6f7; color:#333; font-size:13px; padding:4px 10px; border-radius:6px; margin-top:6px;'>📦 SKU: ${sku}</div>
 <h3 style='margin-bottom:15px; color:#2c3e50;'>${descripcion}</h3>
-<div style='margin-bottom:15px; background:#f4f6f7; color:#333; font-size:15px; padding:12px 20px; border-radius:8px; line-height:1.6; '>${cta}</div>
-${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent; color:#000; font-size:15px; padding:12px 20px; border-radius:8px;'>${formatDescripcionHTML(descripcionProducto)}</div>` : ''} ${botonHTML}
+${cta ? formatMetaDescripcion(cta) : ''}
+${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent; color:#000; font-size:15px; padding:12px 20px; border-radius:8px;'>${formatDescripcionHTML(descripcionProducto)}</div>` : ''}
+${botonHTML}
 <div style='border:1px solid #ddd; border-radius:8px; background:#fff;'>
 <h3 style='background:#2c3e50;color:white;padding:15px;margin:0; text-align:center; border-radius:8px 8px 0 0;'>Nuestros Productos<br>Ficha técnica y especificaciones</h3>
 <table style='width:100%; border-collapse:collapse;'>`;
-        if (marca) html += `<tr style='border-bottom:1px solid #ddd;'><td style='width:120px;padding:15px;'><img src='${imgMarca}' alt='Marca'></td><td style='padding:15px;'><b>Descripción de la Marca:</b> ${marca}</td></tr>`;
-        if (descripcion) html += `<tr style='border-bottom:1px solid #ddd;'><td style='padding:15px;'><img src='${imgDesc}' alt='Descripción'></td><td style='padding:15px;'><b>Nombre del Producto:</b> ${descripcion}</td></tr>`;
-        if (material) html += `<tr style='border-bottom:1px solid #ddd;'><td style='padding:15px;'><img src='${imgMaterial}' alt='Material'></td><td style='padding:15px;'><b>Material:</b> ${material}</td></tr>`;
-        if (dimensiones && dimensiones.trim() !== '') html += `<tr><td style='padding:15px;'><img src='${imgDimensiones}' alt='Dimensiones'></td><td style='padding:15px;'><b>Dimensiones:</b> ${dimensiones}</td></tr>`;
-        html += `</table></div>`;
-        if (embedUrl) html += `<div class='video-container' style='margin-top:0;padding-top:10px;'><iframe width='100%' height='auto' src='${embedUrl}' frameborder='0' allowfullscreen></iframe></div>`;
-        html += `</div>`;
-    });
-    html += '</div>';
-    container.innerHTML = html;
+    if (marca) html += `<tr style='border-bottom:1px solid #ddd;'><td style='width:120px;padding:15px;'><img src='${imgMarca}' alt='Marca'></td><td style='padding:15px;'><b>Descripción de la Marca:</b> ${marca}</td></tr>`;
+    if (descripcion) html += `<tr style='border-bottom:1px solid #ddd;'><td style='padding:15px;'><img src='${imgDesc}' alt='Descripción'></td><td style='padding:15px;'><b>Nombre del Producto:</b> ${descripcion}</td></tr>`;
+    if (material) html += `<tr style='border-bottom:1px solid #ddd;'><td style='padding:15px;'><img src='${imgMaterial}' alt='Material'></td><td style='padding:15px;'><b>Material:</b> ${material}</td></tr>`;
+    if (dimensiones && dimensiones.trim() !== '') html += `<tr><td style='padding:15px;'><img src='${imgDimensiones}' alt='Dimensiones'></td><td style='padding:15px;'><b>Dimensiones:</b> ${dimensiones}</td></tr>`;
+    html += `</table></div>`;
+    if (embedUrl) html += `<div class='video-container' style='margin-top:0;padding-top:10px;'><iframe width='100%' height='auto' src='${embedUrl}' frameborder='0' allowfullscreen></iframe></div>`;
+    html += `</div>`;
+  });
+  html += '</div>';
+  container.innerHTML = html;
 }
-
 function exportHtmlToExcel() {
-    if (!excelRows.length) return alert('❌ No hay datos cargados para exportar.');
-
-    const data = [['SKU', 'Descripción Larga']];
-    excelRows.forEach((row) => {
-        const sku = get(row, ['SKU']);
-        const marca = get(row, ['Descripción de la Marca','Descripcion de la Marca','Descripción Marca']);
-        const descripcion = get(row, ['Nombre del Producto','Nombre Producto','Producto']);
-        const material = get(row, ['Material']);
-        const dimensiones = get(row, ['Dimensiones']);
-        const imgMarca = get(row, ['URL Imagen Marca','URL Imagen Marca ']);
-        const imgDesc = get(row, ['URL Imagen Descripción','URL Imagen Descripcion']);
-        const imgMaterial = get(row, ['URL Imagen Material']);
-        const imgDimensiones = get(row, ['URL Imagen Dimensiones']);
-        const descripcionProducto = get(row, ['Descripción larga','Descripcion larga','Descripción Larga','Descripcion Larga','Descripción']);
-        const videoUrl = get(row, ['VideoYouTube','Video YouTube','YouTube']);
-        const metaDescripcion = get(row, ['Meta Descripción','Meta Descripcion','Descripción corta','Descripcion corta']);
-        const botonTexto = get(row, ['Archivo Descargable (Botón)','Archivo Descargable (Boton)','Texto Botón','Texto Boton']);
-        const botonUrl = get(row, ['URL archivo descargable','URL Archivo Descargable','URL botón','URL Boton','Manual de uso URL']);
-
-        const cta = metaDescripcion.trim() || callToActions[Math.floor(Math.random() * callToActions.length)];
-        const embedUrl = cleanYoutubeUrl(videoUrl);
-
-        let botonHTML = '';
-        if (botonTexto && botonUrl) {
-          botonHTML = `
-            <div style='margin: 15px 0;'>
-              <a href='${botonUrl}' target='_blank' style='
-                display:inline-block;
-                background-color:#922b21;
-                color:#fff;
-                padding:12px 20px;
-                border-radius:6px;
-                font-weight:bold;
-                text-decoration:none;
-                box-shadow: 0 3px 6px rgba(0,0,0,0.1);
-                transition: all 0.2s ease-in-out;
-              ' onmouseover="this.style.boxShadow='0 5px 12px rgba(0,0,0,0.2)'"
-                 onmouseout="this.style.boxShadow='0 3px 6px rgba(0,0,0,0.1)'">
-                ${botonTexto}
-              </a>
-            </div>
-          `;
-        }
-
-        let html = `<div style='margin-bottom:25px; background:#fff;'>
+  if (!excelRows.length) return alert('❌ No hay datos cargados para exportar.');
+  const data = [['SKU', 'Descripción Larga']];
+  excelRows.forEach((row) => {
+    const sku = get(row, ['SKU']);
+    const marca = get(row, ['Descripción de la Marca','Descripcion de la Marca','Descripción Marca']);
+    const descripcion = get(row, ['Nombre del Producto','Nombre Producto','Producto']);
+    const material = get(row, ['Material']);
+    const dimensiones = get(row, ['Dimensiones']);
+    const imgMarca = get(row, ['URL Imagen Marca','URL Imagen Marca ']);
+    const imgDesc = get(row, ['URL Imagen Descripción','URL Imagen Descripcion']);
+    const imgMaterial = get(row, ['URL Imagen Material']);
+    const imgDimensiones = get(row, ['URL Imagen Dimensiones']);
+    const descripcionProducto = get(row, ['Descripción larga','Descripcion larga','Descripción Larga','Descripcion Larga','Descripción']);
+    const videoUrl = get(row, ['VideoYouTube','Video YouTube','YouTube']);
+    const metaDescripcion = get(row, ['Meta Descripción','Meta Descripcion','Descripción corta','Descripcion corta']);
+    const botonTexto = get(row, ['Archivo Descargable (Botón)','Archivo Descargable (Boton)','Texto Botón','Texto Boton']);
+    const botonUrl = get(row, ['URL archivo descargable','URL Archivo Descargable','URL botón','URL Boton','Manual de uso URL']);
+    const cta = metaDescripcion.trim(); // sin fallback
+    const embedUrl = cleanYoutubeUrl(videoUrl);
+    let botonHTML = '';
+    if (botonTexto && botonUrl) {
+      botonHTML = `
+        <div style='margin: 15px 0;'>
+          <a href='${botonUrl}' target='_blank' style='
+            display:inline-block; background-color:#922b21; color:#fff;
+            padding:12px 20px; border-radius:6px; font-weight:bold; text-decoration:none;
+            box-shadow:0 3px 6px rgba(0,0,0,0.1); transition:all 0.2s ease-in-out;
+          ' onmouseover="this.style.boxShadow='0 5px 12px rgba(0,0,0,0.2)'"
+             onmouseout="this.style.boxShadow='0 3px 6px rgba(0,0,0,0.1)'">
+            ${botonTexto}
+          </a>
+        </div>`;
+    }
+    let html = `<div style='margin-bottom:25px; background:#fff;'>
 <h3 style='margin-bottom:15px; color:#2c3e50;'>${descripcion}</h3>
-${formatMetaDescripcion(cta)}
-${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent; color:#000; font-size:15px; padding:12px 20px; border-radius:8px;'>${formatDescripcionHTML(descripcionProducto)}</div>` : ''} ${botonHTML}
+${cta ? formatMetaDescripcion(cta) : ''}
+${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent; color:#000; font-size:15px; padding:12px 20px; border-radius:8px;'>${formatDescripcionHTML(descripcionProducto)}</div>` : ''}
+${botonHTML}
 <div style='border:1px solid #ddd; border-radius:8px;'>
 <h3 style='background:#2c3e50;color:white;padding:15px;margin:0; text-align:center;'>Nuestros Productos<br>Ficha técnica y especificaciones</h3>
 <table style='width:100%; border-collapse:collapse;'>`;
-        if (marca) html += `<tr style='border-bottom:1px solid #ddd;'><td style='width:120px;padding:15px;'><img src='${imgMarca}'></td><td style='padding:15px;'><b>Descripción de la Marca:</b> ${marca}</td></tr>`;
-        if (descripcion) html += `<tr style='border-bottom:1px solid #ddd;'><td style='padding:15px;'><img src='${imgDesc}'></td><td style='padding:15px;'><b>Nombre del Producto:</b> ${descripcion}</td></tr>`;
-        if (material) html += `<tr style='border-bottom:1px solid #ddd;'><td style='padding:15px;'><img src='${imgMaterial}'></td><td style='padding:15px;'><b>Material:</b> ${material}</td></tr>`;
-        if (dimensiones) html += `<tr><td style='padding:15px;'><img src='${imgDimensiones}'></td><td style='padding:15px;'><b>Dimensiones:</b> ${dimensiones}</td></tr>`;
-        html += `</table></div>`;
-        if (embedUrl) html += `<div class='video-container' style='margin-top:0;padding-top:10px;'><iframe width='100%' height='auto' src='${embedUrl}' frameborder='0' allowfullscreen></iframe></div>`;
-        html += `</div>`;
-        data.push([sku, html]);
-    });
-
-    const ws = XLSX.utils.aoa_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Descripciones');
-    XLSX.writeFile(wb, 'descripciones_largas_formato_html.xlsx');
+    if (marca) html += `<tr style='border-bottom:1px solid #ddd;'><td style='width:120px;padding:15px;'><img src='${imgMarca}'></td><td style='padding:15px;'><b>Descripción de la Marca:</b> ${marca}</td></tr>`;
+    if (descripcion) html += `<tr style='border-bottom:1px solid #ddd;'><td style='padding:15px;'><img src='${imgDesc}'></td><td style='padding:15px;'><b>Nombre del Producto:</b> ${descripcion}</td></tr>`;
+    if (material) html += `<tr style='border-bottom:1px solid #ddd;'><td style='padding:15px;'><img src='${imgMaterial}'></td><td style='padding:15px;'><b>Material:</b> ${material}</td></tr>`;
+    if (dimensiones) html += `<tr><td style='padding:15px;'><img src='${imgDimensiones}'></td><td style='padding:15px;'><b>Dimensiones:</b> ${dimensiones}</td></tr>`;
+    html += `</table></div>`;
+    if (embedUrl) html += `<div class='video-container' style='margin-top:0;padding-top:10px;'><iframe width='100%' height='auto' src='${embedUrl}' frameborder='0' allowfullscreen></iframe></div>`;
+    html += `</div>`;
+    data.push([sku, html]);
+  });
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Descripciones');
+  XLSX.writeFile(wb, 'descripciones_largas_formato_html.xlsx');
 }
-
 function limpiarTodo() {
-    document.getElementById('importFile').value = '';
-    document.getElementById('tablesContainer').innerHTML = '<p>📂 Sin datos cargados.</p>';
-    excelRows = [];
-    alert('🧹 Se limpiaron los datos y las tablas correctamente.');
+  document.getElementById('importFile').value = '';
+  document.getElementById('tablesContainer').innerHTML = '<p>📂 Sin datos cargados.</p>';
+  excelRows = [];
+  alert('🧹 Se limpiaron los datos y las tablas correctamente.');
 }
 </script>
 </body>
