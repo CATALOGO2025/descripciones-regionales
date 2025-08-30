@@ -198,12 +198,21 @@ function cleanYoutubeUrl(url) {
         cleanUrl = cleanUrl.replace('watch?v=', 'embed/').split('&')[0];
         return cleanUrl.split('?')[0];
     }
-    return cleanUrl.split('?')[0];
+    
+
+return cleanUrl.split('?')[0];
+}
+
+// --- Helper: elimina la caja de ficha técnica si la tabla quedó vacía (sin filas) ---
+function removeEmptyFichaBlocks(s) {
+  try {
+    return s.replace(/<div[^>]*>\s*<h3[^>]*>[^<]*Nuestros Productos[^<]*<br>Ficha técnica y especificaciones<\/h3>\s*<table[^>]*>\s*<\/table>\s*<\/div>/gis, '');
+  } catch (e) { return s; }
 }
 </script>
 <style>
 body { font-family: Calibri, sans-serif; margin: 0; background-color: #f4f6f7; font-size: 14px; }
-.header {  color: white; padding: 20px; font-size: 28px; text-align: center; font-weight: bold;  background:#2c3e50; }
+.header {  color: white; padding: 20px; font-size: 28px; text-align: center; font-weight: bold;  background:#000273; }
 .card { margin: 20px; background: linear-gradient(180deg, #ffffff, #f8f9fa); border-radius: 12px; padding: 20px; box-shadow: 0 3px 10px rgba(0,0,0,0.1); border: 1px solid #ddd; }
 h2 { border-bottom: 1px solid #ddd; padding-bottom: 10px; font-size: 20px; }
 button { background: linear-gradient(#1f618d, #154360); color: white; border: none; padding: 12px 20px; margin-right: 10px; margin-bottom: 10px; border-radius: 6px; cursor: pointer; font-size: 14px; box-shadow: 0 3px 6px rgba(0,0,0,0.1); transition: all 0.2s ease-in-out; }
@@ -233,11 +242,11 @@ br.pre-h4{display:block;margin:0 0 0 0;}
 
 /* ==== Responsividad Web / Mobile / App ==== */
 @media (max-width: 900px) {
-  .header { font-size: 18px;  background:#2c3e50; }
+  .header { font-size: 18px;  background:#000273; }
   .card { padding: 14px !important; }
   .easy-ficha-wrapper { display: block !important; }
   /* Botón de descarga: que ocupe ancho completo en mobile */
-  a[style*="background-color:#922b21"] {
+  a[style*="background-color:#0057cb"] {
     display: block !important;
     width: 100% !important;
     text-align: center !important;
@@ -259,39 +268,9 @@ img { max-width: 100%; height: auto; }
 .ul-text { padding-left: 18px; margin: 6px 0; }
 
 </style>
-<style>
-
-/* === Color de botones actualizado === */
-.card button,
-button,
-a.btn-primary,
-a[role="button"] {
-  background: #922b21 !important;
-  border-color: #922b21 !important;
-}
-.card button:hover,
-button:hover,
-a.btn-primary:hover,
-a[role="button"]:hover {
-  filter: brightness(0.92);
-}
-/* Botón CTA generado dentro de la ficha */
-.easy-ficha-wrapper a[style*="background-color"] {
-  background-color: #922b21 !important;
-  border-color: #922b21 !important;
-}
-
-</style>
-<style>
-
-/* === Header color override === */
-.header { background: #2c3e50 !important; }
-.card h3[style*="background"] { background: #2c3e50 !important; }
-
-</style>
 </head>
 <body>
-<div class="header" style="background:#2c3e50;">📦 Creador de Descripciones Largas</div>
+<div class="header" style="background:#000273;">📦 Creador de Descripciones Largas</div>
 <div class="card">
 <h2>📜 Instrucciones</h2>
 <ul style="line-height:1.7;">
@@ -391,7 +370,7 @@ function updateTables() {
 <div style='display:inline-block; background:#f4f6f7; color:#333; font-size:13px; padding:4px 10px; border-radius:6px; margin-top:6px;'>📦 SKU: ${sku}</div>
 <h3 style='margin-bottom:15px; color:#2c3e50;'>${descripcion}</h3>
 ${cta ? formatMetaDescripcion(cta) : ''}
-${imgMarca ? `<div style='margin:6px 0 8px 0;'><img src='${imgMarca}' alt='Imagen de Marca' style=';;width:auto;max-height:40px;height:auto;width:auto;display:block;'></div>` : ''}
+${imgMarca ? `<div style='margin:6px 0 8px 0;'><img src='${imgMarca}' alt='Imagen de Marca' style='max-height:60px;height:auto;width:auto;display:block;'></div>` : ''}
 ${marca ? `<div style='margin-bottom:10px; font-size:15px;'>${marca}</div>` : ''}
 ${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent; color:#000; font-size:15px; padding:12px 20px; border-radius:8px;'>${formatDescripcionHTML(descripcionProducto)}</div>` : ''}
 ${botonHTML}
@@ -405,7 +384,7 @@ ${botonHTML}
     html += `</div>`;
   });
   html += '</div>';
-  container.innerHTML = html;
+  container.innerHTML = removeEmptyFichaBlocks(html);
 }
 function exportHtmlToExcel() {
   if (!excelRows.length) return alert('❌ No hay datos cargados para exportar.');
@@ -444,7 +423,7 @@ function exportHtmlToExcel() {
     let html = `<div style='margin-bottom:25px; background:#fff;'>
 <h3 style='margin-bottom:15px; color:#2c3e50;'>${descripcion}</h3>
 ${cta ? formatMetaDescripcion(cta) : ''}
-${imgMarca ? `<div style='margin:6px 0 8px 0;'><img src='${imgMarca}' alt='Imagen de Marca' style=';;width:auto;max-height:40px;height:auto;width:auto;display:block;'></div>` : ''}
+${imgMarca ? `<div style='margin:6px 0 8px 0;'><img src='${imgMarca}' alt='Imagen de Marca' style='max-height:60px;height:auto;width:auto;display:block;'></div>` : ''}
 ${marca ? `<div style='margin-bottom:10px; font-size:15px;'>${marca}</div>` : ''}
 ${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent; color:#000; font-size:15px; padding:12px 20px; border-radius:8px;'>${formatDescripcionHTML(descripcionProducto)}</div>` : ''}
 ${botonHTML}
@@ -456,6 +435,7 @@ ${botonHTML}
     html += `</table></div>`;
     if (embedUrl) html += `<div class='video-container' style='margin-top:0;padding-top:10px;'><iframe width='100%' height='auto' src='${embedUrl}' frameborder='0' allowfullscreen></iframe></div>`;
     html += `</div>`;
+    html = removeEmptyFichaBlocks(html);
     data.push([sku, cleanForCSV(html)]);
   });
   const ws = XLSX.utils.aoa_to_sheet(data);
