@@ -203,6 +203,17 @@ function cleanYoutubeUrl(url) {
 return cleanUrl.split('?')[0];
 }
 
+
+// --- Helper: armar URL de archivo descargable (Easy) ---
+const DOWNLOAD_BASE = "https://cl-gm-original-files.ecomm.cencosud.com/is/image/EasySA/";
+function buildDownloadUrl(value) {
+  if (!value) return "";
+  const v = String(value).trim();
+  if (/^https?:\/\//i.test(v)) return v;   // ya es URL completa
+  const file = v.replace(/^\/+/, "");       // quitar barras iniciales
+  return DOWNLOAD_BASE + encodeURI(file);
+}
+// --- Fin helper ---
 // --- Helper: elimina la caja de ficha técnica si la tabla quedó vacía (sin filas) ---
 function removeEmptyFichaBlocks(s) {
   try {
@@ -348,7 +359,8 @@ function updateTables() {
     const videoUrl = get(row, ['VideoYouTube','Video YouTube','YouTube']);
     const metaDescripcion = get(row, ['Meta Descripción','Meta Descripcion','Descripción corta','Descripcion corta']);
     const botonTexto = get(row, ['Archivo Descargable (Botón)','Archivo Descargable (Boton)','Texto Botón','Texto Boton']);
-    const botonUrl = get(row, ['URL archivo descargable','URL Archivo Descargable','URL botón','URL Boton','Manual de uso URL']);
+    const botonUrlRaw = get(row, ['URL archivo descargable','URL Archivo Descargable','URL botón','URL Boton','Manual de uso URL']);
+    const botonUrl = buildDownloadUrl(botonUrlRaw);
     const cta = metaDescripcion.trim(); // sin fallback
     const embedUrl = cleanYoutubeUrl(videoUrl);
     let botonHTML = '';
@@ -403,7 +415,8 @@ function exportHtmlToExcel() {
     const videoUrl = get(row, ['VideoYouTube','Video YouTube','YouTube']);
     const metaDescripcion = get(row, ['Meta Descripción','Meta Descripcion','Descripción corta','Descripcion corta']);
     const botonTexto = get(row, ['Archivo Descargable (Botón)','Archivo Descargable (Boton)','Texto Botón','Texto Boton']);
-    const botonUrl = get(row, ['URL archivo descargable','URL Archivo Descargable','URL botón','URL Boton','Manual de uso URL']);
+    const botonUrlRaw = get(row, ['URL archivo descargable','URL Archivo Descargable','URL botón','URL Boton','Manual de uso URL']);
+    const botonUrl = buildDownloadUrl(botonUrlRaw);
     const cta = metaDescripcion.trim(); // sin fallback
     const embedUrl = cleanYoutubeUrl(videoUrl);
     let botonHTML = '';
