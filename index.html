@@ -213,6 +213,26 @@ function buildDownloadUrl(value) {
   const file = v.replace(/^\/+/, "");       // quitar barras iniciales
   return DOWNLOAD_BASE + encodeURI(file);
 }
+
+// --- Botón "Guía de Tallas" (diseño neutral/premium, misma lógica URL) ---
+function buildGuiaTallasButton(rawValue) {
+  const u = buildDownloadUrl(rawValue);
+  if (!u) return "";
+  return (
+    "<div style=\"margin:10px 0 16px 0;\">" +
+      "<a href=\"" + u + "\" target=\"_blank\" rel=\"noopener\" aria-label=\"Guía de Tallas\" style=\"" +
+        "display:inline-flex;align-items:center;gap:10px;padding:10px 14px;border-radius:999px;" +
+        "text-decoration:none;font-weight:600;background:#f6f7fb;color:#111827;border:1px solid #e5e7eb;" +
+        "box-shadow:0 1px 2px rgba(0,0,0,.06);transition:background .2s, box-shadow .2s, transform .02s, border-color .2s;\" " +
+        "onmouseover=\"this.style.background='#eceff6';this.style.boxShadow='0 4px 10px rgba(0,0,0,.10)'\" " +
+        "onmouseout=\"this.style.background='#f6f7fb';this.style.boxShadow='0 1px 2px rgba(0,0,0,.06)'\">" +
+        "<span aria-hidden=\"true\" style=\"font-size:16px;line-height:1;width:18px;height:18px;flex:0 0 18px;display:inline-block\">🏷️</span>" +
+        "<span>Guía de Tallas</span>" +
+        "<span aria-hidden=\"true\" style=\"font-size:18px;line-height:1;width:18px;height:18px;flex:0 0 18px\">›</span>" +
+      "</a>" +
+    "</div>"
+  );
+}
 // --- Fin helper ---
 // --- Helper: elimina la caja de ficha técnica si la tabla quedó vacía (sin filas) ---
 function removeEmptyFichaBlocks(s) {
@@ -361,6 +381,10 @@ function updateTables() {
     const botonTexto = get(row, ['Archivo Descargable (Botón)','Archivo Descargable (Boton)','Texto Botón','Texto Boton']);
     const botonUrlRaw = get(row, ['URL archivo descargable','URL Archivo Descargable','URL botón','URL Boton','Manual de uso URL']);
     const botonUrl = buildDownloadUrl(botonUrlRaw);
+    const guiaTallasRaw = get(row, [
+      'Guía de Tallas','Guia de Tallas','Guía Tallas','Guia Tallas','Guía de Tallas (archivo)','Guia de Tallas (archivo)'
+    ]);
+
     const cta = metaDescripcion.trim(); // sin fallback
     const embedUrl = cleanYoutubeUrl(videoUrl);
     let botonHTML = '';
@@ -384,6 +408,8 @@ function updateTables() {
 ${cta ? formatMetaDescripcion(cta) : ''}
 ${imgMarca ? `<div style='margin:6px 0 8px 0;'><img src='${imgMarca}' alt='Imagen de Marca' style='max-height:40px; height:auto; width:auto; display:block;'></div>` : ''}
 ${marca ? `<div style='margin-bottom:10px; font-size:15px;'>${marca}</div>` : ''}
+${guiaTallasRaw ? buildGuiaTallasButton(guiaTallasRaw) : ''}
+
 ${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent; color:#000; font-size:15px; padding:12px 20px; border-radius:8px;'>${formatDescripcionHTML(descripcionProducto)}</div>` : ''}
 ${botonHTML}
 <div style='border:1px solid #ddd; border-radius:8px; background:#fff;'>
@@ -417,6 +443,10 @@ function exportHtmlToExcel() {
     const botonTexto = get(row, ['Archivo Descargable (Botón)','Archivo Descargable (Boton)','Texto Botón','Texto Boton']);
     const botonUrlRaw = get(row, ['URL archivo descargable','URL Archivo Descargable','URL botón','URL Boton','Manual de uso URL']);
     const botonUrl = buildDownloadUrl(botonUrlRaw);
+    const guiaTallasRaw = get(row, [
+      'Guía de Tallas','Guia de Tallas','Guía Tallas','Guia Tallas','Guía de Tallas (archivo)','Guia de Tallas (archivo)'
+    ]);
+
     const cta = metaDescripcion.trim(); // sin fallback
     const embedUrl = cleanYoutubeUrl(videoUrl);
     let botonHTML = '';
@@ -438,6 +468,8 @@ function exportHtmlToExcel() {
 ${cta ? formatMetaDescripcion(cta) : ''}
 ${imgMarca ? `<div style='margin:6px 0 8px 0;'><img src='${imgMarca}' alt='Imagen de Marca' style='max-height:40px; height:auto; width:auto; display:block;'></div>` : ''}
 ${marca ? `<div style='margin-bottom:10px; font-size:15px;'>${marca}</div>` : ''}
+${guiaTallasRaw ? buildGuiaTallasButton(guiaTallasRaw) : ''}
+
 ${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent; color:#000; font-size:15px; padding:12px 20px; border-radius:8px;'>${formatDescripcionHTML(descripcionProducto)}</div>` : ''}
 ${botonHTML}
 <div style='border:1px solid #ddd; border-radius:8px;'>
