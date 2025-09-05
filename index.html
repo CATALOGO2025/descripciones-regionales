@@ -232,17 +232,19 @@ function buildGuiaTallasButton(rawValue){
   const url = buildDownloadUrl(rawValue);
   if (!url) return "";
   return (
-    "<table class='ecr-gt-btn' role='presentation' cellpadding='0' cellspacing='0' border='1' " +
+    "<table role='presentation' cellpadding='0' cellspacing='0' border='1' " +
     "bordercolor='#e5e7eb' bgcolor='#ffffff' " +
-    "style='margin:10px 0 16px 0;border-radius:999px;'>" +
+    "style='display:inline-table;border-collapse:separate;border-spacing:0;border-radius:9999px;box-shadow:0 2px 6px rgba(0,0,0,.06);margin:10px 0 16px 0;'>" +
       "<tr>" +
-        "<td style='border-radius:999px;'>" +
+        "<td style='border-radius:9999px;background:#ffffff;border-color:#e5e7eb;' " +
+            "onmouseover=\"this.style.background='#f6f7fb';this.style.borderColor='#d1d5db'\" " +
+            "onmouseout=\"this.style.background='#ffffff';this.style.borderColor='#e5e7eb'\">" +
           "<a href='" + url + "' target='_blank' rel='noopener'>" +
-             "<span class='inner'>" +
-               "<span aria-hidden='true' class='tag'>🏷️</span>" +
-               "<span class='label'>Guía de Tallas</span>" +
-               "<span class='chev' aria-hidden='true'>›</span>" +
-             "</span>" +
+            "<span style='display:inline-flex;align-items:center;gap:8px;padding:6px 10px;color:#111827;font-weight:700;font-size:14px;'>" +
+              "<span aria-hidden='true' style='font-size:14px;line-height:1'>🏷️</span>" +
+              "<span>Guía de Tallas</span>" +
+              "<span aria-hidden='true' style='display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:9999px;background:#f3f4f6;font-weight:700;'>›</span>" +
+            "</span>" +
           "</a>" +
         "</td>" +
       "</tr>" +
