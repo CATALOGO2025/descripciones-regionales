@@ -207,31 +207,39 @@ return cleanUrl.split('?')[0];
 // --- Helper: armar URL de archivo descargable (Easy) ---
 const DOWNLOAD_BASE = "https://cl-gm-original-files.ecomm.cencosud.com/is/image/EasySA/";
 function buildDownloadUrl(value) {
-  if (!value) return "";
-  const v = String(value).trim();
-  if (/^https?:\/\//i.test(v)) return v;   // ya es URL completa
-  const file = v.replace(/^\/+/, "");       // quitar barras iniciales
+  if (value == null) return "";
+  // Stringify and trim
+  let v = String(value).trim();
+
+  // Decode common HTML-escaped quotes, then strip any surrounding or embedded stray quotes
+  v = v.replace(/&quot;/gi, '"');
+  v = v.replace(/^\s*["']+/, "").replace(/["']+\s*$/, "");
+  v = v.replace(/^%22+/i, "").replace(/%22+$/i, "");
+
+  // Fix missing second slash in scheme: "https:/cl-..." -> "https://cl-..."
+  v = v.replace(/^(https?):\/(?!\/)/i, "$1://");
+
+  // If it's already an absolute URL, return as-is
+  if (/^https?:\/\//i.test(v)) return v;
+
+  // Otherwise, treat as a file/key under our base
+  const file = v.replace(/^\/+/, "");
   return DOWNLOAD_BASE + encodeURI(file);
 }
 
 // --- Botón "Guía de Tallas" (diseño neutral/premium, misma lógica URL) ---
-function buildGuiaTallasButton(rawValue) {
-  const u = buildDownloadUrl(rawValue);
-  if (!u) return "";
-  return (
-    "<div style=\"margin:10px 0 16px 0;\">" +
-      "<a href=\"" + u + "\" target=\"_blank\" rel=\"noopener\" aria-label=\"Guía de Tallas\" style=\"" +
-        "display:inline-flex;align-items:center;gap:10px;padding:10px 14px;border-radius:999px;" +
-        "text-decoration:none;font-weight:600;background:#f6f7fb;color:#111827;border:1px solid #e5e7eb;" +
-        "box-shadow:0 1px 2px rgba(0,0,0,.06);transition:background .2s, box-shadow .2s, transform .02s, border-color .2s;\" " +
-        "onmouseover=\"this.style.background='#eceff6';this.style.boxShadow='0 4px 10px rgba(0,0,0,.10)'\" " +
-        "onmouseout=\"this.style.background='#f6f7fb';this.style.boxShadow='0 1px 2px rgba(0,0,0,.06)'\">" +
-        "<span aria-hidden=\"true\" style=\"font-size:16px;line-height:1;width:18px;height:18px;flex:0 0 18px;display:inline-block\">🏷️</span>" +
-        "<span>Guía de Tallas</span>" +
-        "<span aria-hidden=\"true\" style=\"font-size:18px;line-height:1;width:18px;height:18px;flex:0 0 18px\">›</span>" +
-      "</a>" +
-    "</div>"
-  );
+function buildGuiaTallasButton(rawValue){
+  const url = buildDownloadUrl(rawValue);
+  if (!url) return "";
+  return `
+    <div style="display:inline-flex;align-items:center;gap:10px;padding:10px 14px;
+      border-radius:999px;background:#f6f7fb;color:#111827;border:1px solid #e5e7eb;
+      box-shadow:0 1px 2px rgba(0,0,0,.06);margin:10px 0 16px 0;">
+      <span aria-hidden="true" style="font-size:16px;line-height:1;">🏷️</span>
+      <a href='${url}' target='_blank' rel='noopener' style='text-decoration:none;font-weight:600;color:inherit;'>Guía de Tallas</a>
+      <span aria-hidden="true" style="font-size:18px;line-height:1;">›</span>
+    </div>
+  `;
 }
 // --- Fin helper ---
 // --- Helper: elimina la caja de ficha técnica si la tabla quedó vacía (sin filas) ---
