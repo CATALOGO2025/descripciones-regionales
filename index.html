@@ -182,7 +182,7 @@ function formatDescripcionHTML(textoPlano) {
 }
 function formatMetaDescripcion(texto) {
     if (!texto) return '';
-    const style = "margin-bottom:15px; background:#f4f6f7; color:#333; font-size:15px; padding:12px 20px; border-radius:8px; font-weight:normal; line-height:1.6;";
+    const style = "margin-bottom:15px; background:#f4f6f7; color:#333; font-size:15px; padding:6px 20px; border-radius:8px; font-weight:normal; line-height:1.6;";
     const bloques = String(texto).trim().split(/\r?\n\r?\n/);
     return bloques.map(b => `<p style='${style}'>${b.replace(/\r?\n/g, '<br>')}</p>`).join('');
 }
@@ -231,15 +231,23 @@ function buildDownloadUrl(value) {
 function buildGuiaTallasButton(rawValue){
   const url = buildDownloadUrl(rawValue);
   if (!url) return "";
-  return `
-    <div style="display:inline-flex;align-items:center;gap:10px;padding:10px 14px;
-      border-radius:999px;background:#f6f7fb;color:#111827;border:1px solid #e5e7eb;
-      box-shadow:0 1px 2px rgba(0,0,0,.06);margin:10px 0 16px 0;">
-      <span aria-hidden="true" style="font-size:16px;line-height:1;">🏷️</span>
-      <a href='${url}' target='_blank' rel='noopener' style='text-decoration:none;font-weight:600;color:inherit;'>Guía de Tallas</a>
-      <span aria-hidden="true" style="font-size:18px;line-height:1;">›</span>
-    </div>
-  `;
+  return (
+    "<table class='ecr-gt-btn' role='presentation' cellpadding='0' cellspacing='0' border='1' " +
+    "bordercolor='#e5e7eb' bgcolor='#ffffff' " +
+    "style='margin:10px 0 16px 0;border-radius:999px;'>" +
+      "<tr>" +
+        "<td style='border-radius:999px;'>" +
+          "<a href='" + url + "' target='_blank' rel='noopener'>" +
+             "<span class='inner'>" +
+               "<span aria-hidden='true' class='tag'>🏷️</span>" +
+               "<span class='label'>Guía de Tallas</span>" +
+               "<span class='chev' aria-hidden='true'>›</span>" +
+             "</span>" +
+          "</a>" +
+        "</td>" +
+      "</tr>" +
+    "</table>"
+  );
 }
 // --- Fin helper ---
 // --- Helper: elimina la caja de ficha técnica si la tabla quedó vacía (sin filas) ---
@@ -264,7 +272,7 @@ table td { max-width: 140px; overflow: hidden; vertical-align: middle; text-alig
 @media (max-width: 600px) {
   table { width: 100% !important; margin: 0 !important; padding: 0 !important; }
   table tr { display: flex; flex-direction: column; width: 100%; margin: 0; border-bottom: 1px solid #ccc; }
-  table td { width: 100% !important; text-align: center !important; padding: 10px 5px; box-sizing: border-box; }
+  table td { width: 100% !important; text-align: center !important; padding: 6px 5px; box-sizing: border-box; }
   img[alt="Marca"] { max-width: 100px !important; height: auto !important; display: block; margin: 0 auto; }
   img[alt="Descripción"], img[alt="Material"], img[alt="Dimensiones"] { width: 50px !important; height: 50px !important; object-fit: contain !important; display: block; margin: 0 auto; }
 }
@@ -293,7 +301,7 @@ br.pre-h4{display:block;margin:0 0 0 0;}
   /* Tabla responsive: columnas apiladas */
   .card table { width: 100% !important; border-collapse: collapse; }
   .card table tr { display: block; border-bottom: 1px solid #eee; }
-  .card table td { display: block; width: 100% !important; padding: 10px 12px !important; }
+  .card table td { display: block; width: 100% !important; padding: 6px 12px !important; }
   /* Íconos más pequeños en mobile */
   .card img[alt="Material"],
   .card img[alt="Dimensiones"] { width: 40px !important; height: 40px !important; }
@@ -306,6 +314,16 @@ img { max-width: 100%; height: auto; }
 /* Listas renderizadas desde guiones: margen agradable */
 .ul-text { padding-left: 18px; margin: 6px 0; }
 
+</style>
+<style id="ecr-gt-styles">
+.ecr-gt-btn{ display:inline-table; border-collapse:separate; border-spacing:0; border-radius:999px; box-shadow:0 2px 6px rgba(0,0,0,.06); }
+.ecr-gt-btn td{ background:#ffffff; border:1px solid #e5e7eb; border-radius:999px; }
+.ecr-gt-btn a{ text-decoration:none; color:#111827; font-weight:700; display:block; }
+.ecr-gt-btn .inner{ display:flex; align-items:center; gap:8px; justify-content:center; padding:8px 12px; }
+.ecr-gt-btn .label{ font-size:14px; }
+.ecr-gt-btn .tag{ font-size:14px; line-height:1; }
+.ecr-gt-btn .chev{ display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:999px; background:#f3f4f6; font-weight:700; }
+.ecr-gt-btn:hover td{ background:#f6f7fb; border-color:#d1d5db; }
 </style>
 </head>
 <body>
@@ -401,7 +419,7 @@ function updateTables() {
         <div style='margin: 15px 0;'>
           <a href='${botonUrl}' target='_blank' style='
             display:inline-block; background-color:#922b21; color:#fff;
-            padding:12px 20px; border-radius:6px; font-weight:bold; text-decoration:none;
+            padding:6px 20px; border-radius:6px; font-weight:bold; text-decoration:none;
             box-shadow:0 3px 6px rgba(0,0,0,0.1); transition:all 0.2s ease-in-out;
           ' onmouseover="this.style.boxShadow='0 5px 12px rgba(0,0,0,0.2)'"
              onmouseout="this.style.boxShadow='0 3px 6px rgba(0,0,0,0.1)'">
@@ -418,10 +436,10 @@ ${imgMarca ? `<div style='margin:6px 0 8px 0;'><img src='${imgMarca}' alt='Image
 ${marca ? `<div style='margin-bottom:10px; font-size:15px;'>${marca}</div>` : ''}
 ${guiaTallasRaw ? buildGuiaTallasButton(guiaTallasRaw) : ''}
 
-${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent; color:#000; font-size:15px; padding:12px 20px; border-radius:8px;'>${formatDescripcionHTML(descripcionProducto)}</div>` : ''}
+${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent; color:#000; font-size:15px; padding:6px 20px; border-radius:8px;'>${formatDescripcionHTML(descripcionProducto)}</div>` : ''}
 ${botonHTML}
 <div style='border:1px solid #ddd; border-radius:8px; background:#fff;'>
-<h3 style='background:#2c3e50;color:white;padding:15px;margin:0; text-align:center; border-radius:8px 8px 0 0;'>Nuestros Productos<br>Ficha técnica y especificaciones</h3>
+<div style='background:#e5e7eb;color:#111827;padding:6px;margin:0;text-align:center;border-radius:8px 8px 0 0;border-bottom:1px solid #d1d5db;font-size:16px;line-height:1.35;font-weight:400;' role='heading' aria-level='3'><span style='font-weight:700;font-size:16px'>Nuestros Productos</span><br><span style='font-weight:400;font-size:14px'>Ficha técnica y especificaciones</span></div>
 <table style='width:100%; border-collapse:collapse;'>`;
     if (material) html += `<tr style='border-bottom:1px solid #ddd;'><td style='padding:15px;'><img src='${imgMaterial || defaultImagenes.material}' alt='Material'></td><td style='padding:15px;'><b>Material:</b> ${material}</td></tr>`;
     if (dimensiones && dimensiones.trim() !== '') html += `<tr><td style='padding:15px;'><img src='${imgDimensiones || defaultImagenes.dimensiones}' alt='Dimensiones'></td><td style='padding:15px;'><b>Dimensiones:</b> ${dimensiones}</td></tr>`;
@@ -463,7 +481,7 @@ function exportHtmlToExcel() {
         <div style='margin: 15px 0;'>
           <a href='${botonUrl}' target='_blank' style='
             display:inline-block; background-color:#922b21; color:#fff;
-            padding:12px 20px; border-radius:6px; font-weight:bold; text-decoration:none;
+            padding:6px 20px; border-radius:6px; font-weight:bold; text-decoration:none;
             box-shadow:0 3px 6px rgba(0,0,0,0.1); transition:all 0.2s ease-in-out;
           ' onmouseover="this.style.boxShadow='0 5px 12px rgba(0,0,0,0.2)'"
              onmouseout="this.style.boxShadow='0 3px 6px rgba(0,0,0,0.1)'">
@@ -478,10 +496,10 @@ ${imgMarca ? `<div style='margin:6px 0 8px 0;'><img src='${imgMarca}' alt='Image
 ${marca ? `<div style='margin-bottom:10px; font-size:15px;'>${marca}</div>` : ''}
 ${guiaTallasRaw ? buildGuiaTallasButton(guiaTallasRaw) : ''}
 
-${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent; color:#000; font-size:15px; padding:12px 20px; border-radius:8px;'>${formatDescripcionHTML(descripcionProducto)}</div>` : ''}
+${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent; color:#000; font-size:15px; padding:6px 20px; border-radius:8px;'>${formatDescripcionHTML(descripcionProducto)}</div>` : ''}
 ${botonHTML}
 <div style='border:1px solid #ddd; border-radius:8px;'>
-<h3 style='background:#2c3e50;color:white;padding:15px;margin:0; text-align:center;'>Nuestros Productos<br>Ficha técnica y especificaciones</h3>
+<div style='background:#e5e7eb;color:#111827;padding:6px;margin:0;text-align:center;border-bottom:1px solid #d1d5db;font-size:16px;line-height:1.35;font-weight:400;' role='heading' aria-level='3'><span style='font-weight:700;font-size:16px'>Nuestros Productos</span><br><span style='font-weight:400;font-size:14px'>Ficha técnica y especificaciones</span></div>
 <table style='width:100%; border-collapse:collapse;'>`;
     if (material) html += `<tr style='border-bottom:1px solid #ddd;'><td style='padding:15px;'><img src='${imgMaterial || defaultImagenes.material}'></td><td style='padding:15px;'><b>Material:</b> ${material}</td></tr>`;
     if (dimensiones) html += `<tr><td style='padding:15px;'><img src='${imgDimensiones || defaultImagenes.dimensiones}'></td><td style='padding:15px;'><b>Dimensiones:</b> ${dimensiones}</td></tr>`;
