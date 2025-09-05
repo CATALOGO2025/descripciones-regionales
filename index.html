@@ -440,12 +440,17 @@ ${guiaTallasRaw ? buildGuiaTallasButton(guiaTallasRaw) : ''}
 
 ${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent; color:#000; font-size:15px; padding:6px 20px; border-radius:8px;'>${formatDescripcionHTML(descripcionProducto)}</div>` : ''}
 ${botonHTML}
-<div style='border:1px solid #ddd; border-radius:8px; background:#fff;'>
+`;
+// NUEVO: sólo mostrar la ficha si hay Material o Dimensiones
+const hasSpecs = (material && material.trim() !== '') || (dimensiones && dimensiones.trim() !== '');
+if (hasSpecs) {
+  html += `<div style='border:1px solid #ddd; border-radius:8px; background:#fff;'>
 <div style='background:#e5e7eb;color:#111827;padding:6px;margin:0;text-align:center;border-radius:8px 8px 0 0;border-bottom:1px solid #d1d5db;font-size:16px;line-height:1.35;font-weight:400;' role='heading' aria-level='3'><span style='font-weight:700;font-size:16px'>Nuestros Productos</span><br><span style='font-weight:400;font-size:14px'>Ficha técnica y especificaciones</span></div>
 <table style='width:100%; border-collapse:collapse;'>`;
     if (material) html += `<tr style='border-bottom:1px solid #ddd;'><td style='padding:15px;'><img src='${imgMaterial || defaultImagenes.material}' alt='Material'></td><td style='padding:15px;'><b>Material:</b> ${material}</td></tr>`;
     if (dimensiones && dimensiones.trim() !== '') html += `<tr><td style='padding:15px;'><img src='${imgDimensiones || defaultImagenes.dimensiones}' alt='Dimensiones'></td><td style='padding:15px;'><b>Dimensiones:</b> ${dimensiones}</td></tr>`;
     html += `</table></div>`;
+}
     if (embedUrl) html += `<div style="position:relative;width:100%;padding-top:56.25%;margin-top:16px;border-radius:12px;overflow:hidden;"><iframe src='${embedUrl}' style="position:absolute;inset:0;width:100%;height:100%;border:0;display:block;" allowfullscreen></iframe></div>`;
     html += `</div>`;
   });
@@ -500,12 +505,17 @@ ${guiaTallasRaw ? buildGuiaTallasButton(guiaTallasRaw) : ''}
 
 ${descripcionProducto ? `<div style='margin-bottom:15px; background:transparent; color:#000; font-size:15px; padding:6px 20px; border-radius:8px;'>${formatDescripcionHTML(descripcionProducto)}</div>` : ''}
 ${botonHTML}
-<div style='border:1px solid #ddd; border-radius:8px;'>
+`;
+// NUEVO: sólo mostrar la ficha si hay Material o Dimensiones
+const hasSpecs = (material && material.trim() !== '') || (dimensiones && dimensiones.trim() !== '');
+if (hasSpecs) {
+  html += `<div style='border:1px solid #ddd; border-radius:8px;'>
 <div style='background:#e5e7eb;color:#111827;padding:6px;margin:0;text-align:center;border-bottom:1px solid #d1d5db;font-size:16px;line-height:1.35;font-weight:400;' role='heading' aria-level='3'><span style='font-weight:700;font-size:16px'>Nuestros Productos</span><br><span style='font-weight:400;font-size:14px'>Ficha técnica y especificaciones</span></div>
 <table style='width:100%; border-collapse:collapse;'>`;
     if (material) html += `<tr style='border-bottom:1px solid #ddd;'><td style='padding:15px;'><img src='${imgMaterial || defaultImagenes.material}'></td><td style='padding:15px;'><b>Material:</b> ${material}</td></tr>`;
     if (dimensiones) html += `<tr><td style='padding:15px;'><img src='${imgDimensiones || defaultImagenes.dimensiones}'></td><td style='padding:15px;'><b>Dimensiones:</b> ${dimensiones}</td></tr>`;
     html += `</table></div>`;
+}
     if (embedUrl) html += `<div style="position:relative;width:100%;padding-top:56.25%;margin-top:16px;border-radius:12px;overflow:hidden;"><iframe src='${embedUrl}' style="position:absolute;inset:0;width:100%;height:100%;border:0;display:block;" allowfullscreen></iframe></div>`;
     html += `</div>`;
     html = removeEmptyFichaBlocks(html);
